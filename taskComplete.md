@@ -88,10 +88,18 @@ npx tsc --noEmit
 
 ### 7. Zustand Auth Store (Enhanced)
 - Added `token: string | null` to auth state
+- Added `status: AccountStatus | null` (active | suspended | pending | inactive)
 - Added `setAuth(user, token)` method for login
+- Added `updateUser(user)` method for profile updates
 - Added `isHydrated` flag for SSR safety
-- Configured `partialize` to persist only user, token, isAuthenticated
+- Storage key renamed to `foodlink-auth`
+- Configured `partialize` to persist user, token, isAuthenticated, status
 - Added `onRehydrateStorage` callback to set hydrated flag
+
+### 8. SSR Hydration Safety (`useAuth` hook)
+- Created `useAuth()` hook with explicit return type `UseAuthReturn`
+- Exposes `isHydrated` flag to prevent hydration mismatch in components
+- Use pattern: `const { isHydrated, user } = useAuth(); if (!isHydrated) return null;`
 
 ## Terminal Commands Executed
 
@@ -129,8 +137,85 @@ npx tsc --noEmit
 - tailwind-merge
 - zustand
 
+### 9. Authentication UI (Login/Register Pages)
+- Created `src/lib/validations/auth.ts` with Zod schemas matching backend:
+  - `loginSchema`: email/phone + password
+  - `registerSchema`: discriminated union for USER vs ORGANIZATION
+  - `UserRole`: USER | ORGANIZATION
+- Updated `src/services/authService.ts`:
+  - `loginUser`, `registerUser`, `googleLogin` methods
+  - Using backend types (User, AuthResponse)
+- Created `src/hooks/useAuthMutations.ts`:
+  - `useLoginMutation`: TanStack Query mutation with toast + redirect
+  - `useRegisterMutation`: TanStack Query mutation with toast + redirect
+  - `useGoogleLoginMutation`: Google OAuth mutation
+- Created `src/app/(auth)/login/page.tsx`:
+  - TanStack Form with Zod validation
+  - Email/Password form fields with error messages
+  - **Demo Login button**: auto-fills `demo@foodlink.com`/`demo123` and submits
+  - Google Login button with OAuth popup flow
+  - Loading states with spinners on buttons
+  - Toast notifications for success/error
+  - Link to register page
+- Created `src/app/(auth)/register/page.tsx`:
+  - Role toggle: USER vs ORGANIZATION (RadioGroup)
+  - Conditional fields: name (USER) or orgName (ORGANIZATION)
+  - Common fields: email, password (min 6), phone
+  - Location fields: latitude, longitude
+  - Optional org fields: establishedYear, registrationNumber
+  - TanStack Form with Zod validation
+  - Loading states and error messages
+  - Link to login page
+- Created `src/app/(auth)/layout.tsx`:
+  - Minimal centered layout with gradient background
+  - Full-screen auth container
+
+## Terminal Commands Executed
+
+```bash
+# Initialize ShadCN UI (recommended, but CLI had Windows terminal issues)
+npx shadcn@latest init --yes --template next --base-color slate
+npx shadcn@latest add button input card dialog toast dropdown-menu form label
+
+# Install dependencies
+npm install clsx tailwind-merge axios zustand @tanstack/react-query next-themes sonner
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-slot
+npm install class-variance-authority lucide-react react-hook-form
+
+# Phase 2 - Add devtools
+npm install @tanstack/react-query-devtools
+
+# Phase 3 - Auth UI dependencies
+npm install zod @tanstack/react-form @tanstack/zod-form-adapter
+npm install @radix-ui/react-radio-group
+
+# Type check
+npx tsc --noEmit
+```
+
+## Dependencies Added
+- @radix-ui/react-dialog
+- @radix-ui/react-dropdown-menu
+- @radix-ui/react-label
+- @radix-ui/react-radio-group
+- @radix-ui/react-slot
+- @tanstack/react-form
+- @tanstack/react-query
+- @tanstack/react-query-devtools
+- @tanstack/zod-form-adapter
+- axios
+- class-variance-authority
+- clsx
+- lucide-react
+- next-themes
+- sonner
+- tailwind-merge
+- zod
+- zustand
+
 ## Git Commit Messages
 ```
 chore: setup frontend arch and shadcn ui
 feat: setup zustand auth, axios interceptors, react query
+feat: implement login/register pages with tanstack form and demo login
 ```

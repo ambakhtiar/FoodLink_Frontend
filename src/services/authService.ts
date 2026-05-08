@@ -1,36 +1,34 @@
 import { apiClient } from "@/lib/axios";
-import type { User } from "@/types/user";
+import type { User } from "@/store/authStore";
+import type {
+    LoginInput,
+    RegisterInput,
+    GoogleLoginInput,
+} from "@/lib/validations/auth";
 
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-  role: "donor" | "receiver";
-}
-
-interface AuthResponse {
-  user: User;
-  token: string;
+export interface AuthResponse {
+    user: User;
+    token: string;
 }
 
 export const authService = {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const { data } = await apiClient.post<AuthResponse>("/auth/login", credentials);
-    return data;
-  },
+    async loginUser(credentials: LoginInput): Promise<AuthResponse> {
+        const { data } = await apiClient.post<AuthResponse>("/auth/login", credentials);
+        return data;
+    },
 
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>("/auth/register", data);
-    return response.data;
-  },
+    async registerUser(data: RegisterInput): Promise<AuthResponse> {
+        const response = await apiClient.post<AuthResponse>("/auth/register", data);
+        return response.data;
+    },
 
-  async getProfile(): Promise<User> {
-    const { data } = await apiClient.get<User>("/auth/profile");
-    return data;
-  },
+    async googleLogin(data: GoogleLoginInput): Promise<AuthResponse> {
+        const response = await apiClient.post<AuthResponse>("/auth/google", data);
+        return response.data;
+    },
+
+    async getProfile(): Promise<User> {
+        const { data } = await apiClient.get<User>("/auth/me");
+        return data;
+    },
 };
