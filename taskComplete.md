@@ -247,6 +247,19 @@ npx tsc --noEmit
 - tailwind-merge
 - zod
 - zustand
+- framer-motion
+
+### 11. Home/Landing Page (8 Sections)
+- Blue glassmorphism theme in `globals.css` with `.glass-panel` utilities
+- 8 animated sections using Framer Motion:
+  1. HeroSection (60-70vh, AI highlights card)
+  2. StatsSection (4 animated counters)
+  3. FeaturesSection (6 feature cards)
+  4. RecentPostsSection (4 food listing cards)
+  5. HowItWorksSection (3-step timeline)
+  6. AIHighlightSection (blue gradient showcase)
+  7. TestimonialSection (3 user reviews)
+  8. CTASection (newsletter + signup)
 
 ## Git Commit Messages
 ```
@@ -254,4 +267,5 @@ chore: setup frontend arch and shadcn ui
 feat: setup zustand auth, axios interceptors, react query
 feat: implement login/register pages with tanstack form and demo login
 feat: add responsive navbar with auth routes and glassmorphism footer
+feat: build landing page with 8 sections and framer motion animations
 ```
