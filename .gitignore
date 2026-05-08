@@ -39,3 +39,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Auto-generated agent rules (personalized per developer)
+.brainsync/agent-rules.md
+
+# Auto-generated AI agent exclusions
+.cursorrules
+.clineRules
+.agent/
+.windsurfrules
+.gemini/
+.cline/ 
+
+
+.agent
+.agent-mem/
+.agents
+.brainsync/
+.cursor
+.vscode/
+docs
+node_modules/
+.mcp.json
+.mcp.json.bak
+AGENT.md
+AGENTS.md
+.prettierrc
+.windsurfrules
+CLAUDE.md
