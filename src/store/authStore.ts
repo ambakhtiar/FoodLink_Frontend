@@ -9,6 +9,7 @@ export interface User {
     name: string;
     role: "donor" | "receiver" | "admin";
     status?: AccountStatus;
+    avatar?: string;
 }
 
 interface AuthState {
@@ -29,6 +30,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             isAuthenticated: false,
+            status: null,
             isHydrated: false,
             setAuth: (user, token) =>
                 set({

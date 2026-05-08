@@ -170,6 +170,36 @@ npx tsc --noEmit
   - Minimal centered layout with gradient background
   - Full-screen auth container
 
+### 10. Global Layout (Navbar & Footer)
+- Created `src/components/shared/Navbar.tsx`:
+  - Sticky top position with glassmorphism (backdrop-blur-xl)
+  - Blue-white modern UI theme
+  - Responsive mobile hamburger menu
+  - Theme toggle button integration
+  - **Conditional routing based on auth state:**
+    - Logged out (4 routes): Home, Explore, About, Contact
+    - Logged in (6 routes): Home, Explore, Dashboard, My Requests, About, Contact
+  - **Profile Dropdown** (when authenticated):
+    - Avatar with user initials
+    - Profile, Dashboard, Settings links
+    - Logout option with confirmation
+  - SSR-safe using `isHydrated` check from `useAuth` hook
+  - Sign in / Get Started buttons for non-authenticated users
+- Created `src/components/shared/Footer.tsx`:
+  - 6-column responsive grid layout
+  - Brand column with logo, description, contact info
+  - Product, Company, Legal, Support link columns
+  - Social media icons (Facebook, Twitter, Instagram, LinkedIn)
+  - Functional contact links (email, phone, address)
+  - Copyright notice with heart icon
+- Created `src/components/ui/avatar.tsx`:
+  - Radix UI Avatar component for user profile pictures
+- Updated `src/app/layout.tsx`:
+  - Wrapped content with Navbar and Footer
+  - Added `<main className="flex-1">` for proper content expansion
+  - Maintained ThemeProvider and QueryProvider structure
+  - Dark mode contrast preserved across all elements
+
 ## Terminal Commands Executed
 
 ```bash
@@ -188,12 +218,17 @@ npm install @tanstack/react-query-devtools
 # Phase 3 - Auth UI dependencies
 npm install zod @tanstack/react-form @tanstack/zod-form-adapter
 npm install @radix-ui/react-radio-group
+npm install @radix-ui/react-avatar
+
+# Phase 4 - Global Layout dependencies
+npm install --legacy-peer-deps
 
 # Type check
 npx tsc --noEmit
 ```
 
 ## Dependencies Added
+- @radix-ui/react-avatar
 - @radix-ui/react-dialog
 - @radix-ui/react-dropdown-menu
 - @radix-ui/react-label
@@ -218,4 +253,5 @@ npx tsc --noEmit
 chore: setup frontend arch and shadcn ui
 feat: setup zustand auth, axios interceptors, react query
 feat: implement login/register pages with tanstack form and demo login
+feat: add responsive navbar with auth routes and glassmorphism footer
 ```

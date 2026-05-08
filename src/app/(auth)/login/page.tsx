@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,11 +32,10 @@ export default function LoginPage() {
       email: "",
       password: "",
     } as LoginInput,
-    validatorAdapter: zodValidator(),
     validators: {
       onSubmit: loginSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value }: { value: LoginInput }) => {
       loginMutation.mutate(value);
     },
   });
@@ -91,7 +89,7 @@ export default function LoginPage() {
         >
           <form.Field
             name="email"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name}>Email or Phone</Label>
                 <Input
@@ -115,7 +113,7 @@ export default function LoginPage() {
 
           <form.Field
             name="password"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name}>Password</Label>
                 <Input

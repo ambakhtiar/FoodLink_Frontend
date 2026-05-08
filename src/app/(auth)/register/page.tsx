@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -45,11 +44,10 @@ export default function RegisterPage() {
       establishedYear: undefined,
       registrationNumber: "",
     } as RegisterFormValues,
-    validatorAdapter: zodValidator(),
     validators: {
       onSubmit: registerSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value }: { value: RegisterFormValues }) => {
       registerMutation.mutate(value as UserRegisterInput | OrgRegisterInput);
     },
   });
@@ -77,7 +75,7 @@ export default function RegisterPage() {
           {/* Role Selection */}
           <form.Field
             name="role"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label>I want to join as</Label>
                 <RadioGroup
@@ -128,7 +126,7 @@ export default function RegisterPage() {
           {role === "USER" ? (
             <form.Field
               name="name"
-              children={(field) => (
+              children={(field: any) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Full Name</Label>
                   <Input
@@ -152,7 +150,7 @@ export default function RegisterPage() {
           ) : (
             <form.Field
               name="orgName"
-              children={(field) => (
+              children={(field: any) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Organization Name</Label>
                   <Input
@@ -178,7 +176,7 @@ export default function RegisterPage() {
           {/* Common Fields */}
           <form.Field
             name="email"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name}>Email</Label>
                 <Input
@@ -202,7 +200,7 @@ export default function RegisterPage() {
 
           <form.Field
             name="password"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name}>Password</Label>
                 <Input
@@ -226,7 +224,7 @@ export default function RegisterPage() {
 
           <form.Field
             name="phone"
-            children={(field) => (
+            children={(field: any) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name}>Phone Number</Label>
                 <Input
@@ -252,7 +250,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             <form.Field
               name="latitude"
-              children={(field) => (
+              children={(field: any) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Latitude</Label>
                   <Input
@@ -279,7 +277,7 @@ export default function RegisterPage() {
 
             <form.Field
               name="longitude"
-              children={(field) => (
+              children={(field: any) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Longitude</Label>
                   <Input
@@ -311,7 +309,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <form.Field
                   name="establishedYear"
-                  children={(field) => (
+                  children={(field: any) => (
                     <div className="space-y-2">
                       <Label htmlFor={field.name}>
                         Established Year (Optional)
@@ -336,7 +334,7 @@ export default function RegisterPage() {
 
                 <form.Field
                   name="registrationNumber"
-                  children={(field) => (
+                  children={(field: any) => (
                     <div className="space-y-2">
                       <Label htmlFor={field.name}>
                         Reg. Number (Optional)
