@@ -52,8 +52,8 @@ export function CTASection() {
                 size="lg"
                 className="h-14 rounded-xl bg-primary px-8 text-base font-bold text-primary-foreground hover:bg-primary/90 hover:shadow-[0_8px_24px_hsl(var(--primary)/0.35)] transition-all"
               >
-                <Link href="/register">
-                  Get Started Free
+                <Link href="/auth/register">
+                  Register
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

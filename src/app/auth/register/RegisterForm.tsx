@@ -1,21 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   registerSchema,
   UserRole,
@@ -23,13 +17,23 @@ import {
   type OrgRegisterInput,
 } from "@/lib/validations/auth";
 import { useRegisterMutation } from "@/hooks/useAuthMutations";
+import { useAuthStore } from "@/store/authStore";
 
 type RegisterFormValues =
   | (Omit<UserRegisterInput, "role"> & { role: "USER" })
   | (Omit<OrgRegisterInput, "role"> & { role: "ORGANIZATION" });
 
-export default function RegisterPage() {
+export function RegisterForm() {
   const registerMutation = useRegisterMutation();
+  const [showPassword, setShowPassword] = useState(false);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const form = useForm({
     defaultValues: {
@@ -80,15 +84,14 @@ export default function RegisterPage() {
             name="role"
             children={(field: any) => (
               <div className="space-y-3">
-                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Account Category</Label>
                 <RadioGroup
                   value={field.state.value}
                   onValueChange={(value) =>
                     field.handleChange(value as "USER" | "ORGANIZATION")
                   }
-                  className="grid grid-cols-2 gap-4"
+                  className="flex bg-white/5 border border-white/10 rounded-full p-1"
                 >
-                  <div>
+                  <div className="flex-1">
                     <RadioGroupItem
                       value={UserRole.USER}
                       id="user"
@@ -96,15 +99,12 @@ export default function RegisterPage() {
                     />
                     <Label
                       htmlFor="user"
-                      className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-white/5 bg-white/5 p-6 hover:bg-white/10 transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer group"
+                      className="flex items-center justify-center py-2 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground cursor-pointer transition-all peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md"
                     >
-                      <span className="font-bold text-lg group-hover:scale-110 transition-transform">Individual</span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        Donate Food
-                      </span>
+                      Individual
                     </Label>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <RadioGroupItem
                       value={UserRole.ORGANIZATION}
                       id="organization"
@@ -112,12 +112,9 @@ export default function RegisterPage() {
                     />
                     <Label
                       htmlFor="organization"
-                      className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-white/5 bg-white/5 p-6 hover:bg-white/10 transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 cursor-pointer group"
+                      className="flex items-center justify-center py-2 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground cursor-pointer transition-all peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:shadow-md"
                     >
-                      <span className="font-bold text-lg group-hover:scale-110 transition-transform">Organization</span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        Receive Relief
-                      </span>
+                      Organization
                     </Label>
                   </div>
                 </RadioGroup>
@@ -132,12 +129,13 @@ export default function RegisterPage() {
                 name="name"
                 children={(field: any) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Full Legal Name</Label>
+                    <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
                     <Input
                       id={field.name}
                       name={field.name}
                       type="text"
                       placeholder="John Doe"
+                      autoComplete="name"
                       className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all"
                       value={field.state.value}
                       onBlur={field.handleBlur}
@@ -157,7 +155,7 @@ export default function RegisterPage() {
                 name="orgName"
                 children={(field: any) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Organization Title</Label>
+                    <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Organization Name</Label>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -183,12 +181,13 @@ export default function RegisterPage() {
               name="email"
               children={(field: any) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email Address</Label>
+                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
                   <Input
                     id={field.name}
                     name={field.name}
                     type="email"
                     placeholder="name@agency.org"
+                    autoComplete="email"
                     className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -208,12 +207,13 @@ export default function RegisterPage() {
               name="phone"
               children={(field: any) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Primary Contact</Label>
+                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Phone</Label>
                   <Input
                     id={field.name}
                     name={field.name}
                     type="tel"
                     placeholder="+880 1XXX-XXXXXX"
+                    autoComplete="tel"
                     className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -233,18 +233,31 @@ export default function RegisterPage() {
               name="password"
               children={(field: any) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Security Code</Label>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="password"
-                    placeholder="••••••••"
-                    className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    disabled={registerMutation.isPending}
-                  />
+                  <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all pr-12"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      disabled={registerMutation.isPending}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={registerMutation.isPending}
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </Button>
+                  </div>
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
                       {field.state.meta.errors.join(", ")}
@@ -260,7 +273,7 @@ export default function RegisterPage() {
               <span className="w-full border-t border-white/5" />
             </div>
             <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-              <span className="bg-background px-4 text-muted-foreground/60">Geo-Location Data</span>
+              <span className="bg-background px-4 text-muted-foreground/60">Location Details</span>
             </div>
           </div>
 
@@ -374,10 +387,10 @@ export default function RegisterPage() {
             {registerMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Registering Account...
+                Registering...
               </>
             ) : (
-              "Initialize Membership"
+              "Register"
             )}
           </Button>
         </form>
@@ -386,7 +399,7 @@ export default function RegisterPage() {
           <p className="text-sm font-medium text-muted-foreground">
             Already part of the movement?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-primary font-black hover:underline underline-offset-4"
             >
               Sign In
@@ -397,4 +410,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

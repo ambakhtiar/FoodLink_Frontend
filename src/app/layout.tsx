@@ -4,8 +4,6 @@ import "./globals.css";
 
 import { QueryProvider } from "@/lib/QueryProvider";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
-import { Navbar } from "@/components/shared/Navbar";
-import { Footer } from "@/components/shared/Footer";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -23,6 +21,10 @@ export const metadata: Metadata = {
     description: "A platform to reduce food waste by connecting food donors with organizations in need.",
 };
 
+
+
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -33,21 +35,22 @@ export default function RootLayout({
             lang="en"
             className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
             suppressHydrationWarning
+            data-scroll-behavior="smooth"
         >
             <body className="min-h-full flex flex-col">
-                <QueryProvider>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        <Navbar />
-                        <main className="flex-1">{children}</main>
-                        <Footer />
-                        <Toaster />
-                    </ThemeProvider>
-                </QueryProvider>
+                <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+                    <QueryProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="system"
+                            enableSystem
+                            disableTransitionOnChange
+                        >
+                            {children}
+                            <Toaster />
+                        </ThemeProvider>
+                    </QueryProvider>
+                </GoogleOAuthProvider>
             </body>
         </html>
     );

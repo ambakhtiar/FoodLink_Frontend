@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Heart, Users, Leaf } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-[60vh] md:min-h-[70vh] py-8 lg:py-12 items-center overflow-hidden bg-background">
+    <section className="relative flex min-h-[60vh] md:min-h-[70vh] pt-4 pb-8 lg:pt-6 lg:pb-12 items-center overflow-hidden bg-background">
       {/* Premium Background Mesh */}
       <div className="bg-mesh absolute inset-0" />
       
@@ -17,7 +18,7 @@ export function HeroSection() {
         <div className="absolute bottom-[10%] right-[10%] h-[40%] w-[40%] rounded-full bg-secondary/10 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-4 pt-0 pb-8 sm:px-6 lg:px-8">
         <div className="grid items-center gap-6 lg:gap-10 lg:grid-cols-2">
           {/* Left Content */}
           <motion.div
@@ -135,7 +136,7 @@ export function HeroSection() {
                   <div className="flex -space-x-3">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="h-10 w-10 rounded-full border-2 border-background bg-muted overflow-hidden shadow-sm">
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="user" className="h-full w-full object-cover" />
+                        <Image src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="user" width={40} height={40} className="h-full w-full object-cover" />
                       </div>
                     ))}
                   </div>
