@@ -28,9 +28,12 @@ export interface IPost {
     likesCount: number;
     commentsCount: number;
     createdAt: string;
+    estimatedShelfLife?: string;
     isLikedByMe?: boolean;
     author: {
-        userProfile?: { name: string };
-        organizationProfile?: { orgName: string };
+        id: string;
+        profilePictureUrl?: string;
+        userProfile?: { name: string; impactScore?: number };
+        organizationProfile?: { orgName: string; impactScore?: number };
     };
 }

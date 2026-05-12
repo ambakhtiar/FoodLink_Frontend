@@ -54,14 +54,14 @@ function ThemeToggle() {
 
 const publicRoutes = [
     { href: "/", label: "Home" },
-    { href: "/explore", label: "Explore" },
+    { href: "/feed", label: "Feed" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
 ];
 
 const authenticatedRoutes = [
     { href: "/", label: "Home" },
-    { href: "/explore", label: "Explore" },
+    { href: "/feed", label: "Feed" },
     { href: "/dashboard", label: "Dashboard" },
     { href: "/my-requests", label: "My Requests" },
     { href: "/about", label: "About" },
@@ -96,7 +96,7 @@ export function Navbar() {
     return (
         <header className="sticky top-0 z-50 w-full pt-2 px-4 sm:px-6 lg:px-8 transition-all duration-300">
             {/* Pill Container */}
-            <div className={`mx-auto max-w-7xl rounded-[2rem] border border-white/10 dark:border-white/5 shadow-2xl backdrop-blur-xl transition-all duration-300 relative ${scrolled
+            <div className={`mx-auto max-w-7xl rounded-[2rem] border border-white/10 dark:border-white/5 shadow-sm backdrop-blur-xl transition-all duration-300 relative ${scrolled
                 ? "bg-background/95 h-14 shadow-primary/5"
                 : "bg-background/80 h-16"
                 } ${mobileMenuOpen ? "rounded-[2rem]" : "rounded-full"}`}>

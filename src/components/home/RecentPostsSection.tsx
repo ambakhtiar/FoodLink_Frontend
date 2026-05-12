@@ -125,7 +125,7 @@ export function RecentPostsSection() {
                                         </span>
                                     </div>
                                     <Button asChild size="sm" variant="ghost" className="h-10 rounded-xl px-4 font-bold text-xs hover:bg-primary/10 hover:text-primary">
-                                        <Link href={`/food/${post.id}`}>Inspect</Link>
+                                        <Link href={`/feed/${post.id}`}>Inspect</Link>
                                     </Button>
                                 </div>
                             </div>

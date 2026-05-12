@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -25,6 +25,16 @@ import { postService } from "@/services/postService";
 import { PostType, PostCategory } from "@/types/post";
 import { useRouter } from "next/navigation";
 
+interface CreatePostFormData {
+    type: PostType;
+    category: PostCategory;
+    quantity: number;
+    latitude: number;
+    longitude: number;
+    title?: string;
+    description?: string;
+}
+
 const createPostSchema = z.object({
     type: z.nativeEnum(PostType),
     category: z.nativeEnum(PostCategory),
@@ -35,8 +45,6 @@ const createPostSchema = z.object({
     description: z.string().optional(),
 });
 
-type CreatePostValues = z.infer<typeof createPostSchema>;
-
 export function CreatePostForm() {
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
@@ -44,24 +52,60 @@ export function CreatePostForm() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        formState: { errors },
-    } = useForm<CreatePostValues>({
-        resolver: zodResolver(createPostSchema),
+    const form = useForm({
         defaultValues: {
             type: PostType.DONATION,
             category: PostCategory.COOKED_FOOD,
             quantity: 1,
-            latitude: 23.8103, // Default to Dhaka
+            latitude: 23.8103,
             longitude: 90.4125,
+            title: undefined,
+            description: undefined,
+        } as CreatePostFormData,
+        validators: {
+            onChange: createPostSchema,
+        },
+        onSubmit: async ({ value }) => {
+            if (value.type === PostType.DONATION && selectedImages.length === 0) {
+                toast.error("Please upload at least one image for donations");
+                return;
+            }
+
+            if (value.type === PostType.REQUEST) {
+                if (!value.title || !value.title.trim()) {
+                    toast.error("Please provide a title for your request");
+                    return;
+                }
+                if (!value.description || !value.description.trim()) {
+                    toast.error("Please provide a description for your request");
+                    return;
+                }
+            }
+
+            try {
+                setIsSubmitting(true);
+                const formData = new FormData();
+                
+                Object.entries(value).forEach(([key, val]) => {
+                    if (val !== undefined && val !== null && val !== "") {
+                        formData.append(key, val.toString());
+                    }
+                });
+
+                selectedImages.forEach((file) => {
+                    formData.append("images", file);
+                });
+
+                const result = await postService.createPost(formData);
+                toast.success("Post created successfully!");
+                router.push(`/feed/${result.data.id}`);
+            } catch (error: any) {
+                toast.error(error.response?.data?.message || "Failed to create post");
+            } finally {
+                setIsSubmitting(false);
+            }
         },
     });
-
-    const postType = watch("type");
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -81,42 +125,9 @@ export function CreatePostForm() {
     const removeImage = (index: number) => {
         const newImages = selectedImages.filter((_, i) => i !== index);
         const newPreviews = previews.filter((_, i) => i !== index);
-        
-        // Revoke the URL to avoid memory leaks
         URL.revokeObjectURL(previews[index]);
-        
         setSelectedImages(newImages);
         setPreviews(newPreviews);
-    };
-
-    const onSubmit = async (data: CreatePostValues) => {
-        if (data.type === PostType.DONATION && selectedImages.length === 0) {
-            toast.error("Please upload at least one image for donations");
-            return;
-        }
-
-        try {
-            setIsSubmitting(true);
-            const formData = new FormData();
-            
-            // Append basic fields
-            Object.entries(data).forEach(([key, value]) => {
-                if (value !== undefined) formData.append(key, value.toString());
-            });
-
-            // Append images
-            selectedImages.forEach((file) => {
-                formData.append("images", file);
-            });
-
-            const result = await postService.createPost(formData);
-            toast.success("Post created successfully!");
-            router.push(`/food/${result.data.id}`);
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to create post");
-        } finally {
-            setIsSubmitting(false);
-        }
     };
 
     return (
@@ -133,44 +144,61 @@ export function CreatePostForm() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        form.handleSubmit();
+                    }} 
+                    className="space-y-8"
+                >
                     {/* Post Type Selection */}
-                    <div className="space-y-4">
-                        <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Post Type</Label>
-                        <RadioGroup 
-                            defaultValue={PostType.DONATION} 
-                            onValueChange={(val) => setValue("type", val as PostType)}
-                            className="grid grid-cols-2 gap-4"
-                        >
-                            <div>
-                                <RadioGroupItem value={PostType.DONATION} id="donation" className="peer sr-only" />
-                                <Label
-                                    htmlFor="donation"
-                                    className="flex flex-col items-center justify-between rounded-2xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                    <form.Field
+                        name="type"
+                        children={(field) => (
+                            <div className="space-y-4">
+                                <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Post Type</Label>
+                                <RadioGroup 
+                                    value={field.state.value} 
+                                    onValueChange={(val) => field.handleChange(val as PostType)}
+                                    className="grid grid-cols-2 gap-4"
                                 >
-                                    <ImageIcon className="mb-3 h-6 w-6 text-primary" />
-                                    <span className="font-bold">Donation</span>
-                                </Label>
+                                    <div>
+                                        <RadioGroupItem value={PostType.DONATION} id="donation" className="peer sr-only" />
+                                        <Label
+                                            htmlFor="donation"
+                                            className="flex flex-col items-center justify-between rounded-2xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                        >
+                                            <ImageIcon className="mb-3 h-6 w-6 text-primary" />
+                                            <span className="font-bold">Donation</span>
+                                        </Label>
+                                    </div>
+                                    <div>
+                                        <RadioGroupItem value={PostType.REQUEST} id="request" className="peer sr-only" />
+                                        <Label
+                                            htmlFor="request"
+                                            className="flex flex-col items-center justify-between rounded-2xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
+                                        >
+                                            <AlertCircle className="mb-3 h-6 w-6 text-orange-500" />
+                                            <span className="font-bold">Request</span>
+                                        </Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
-                            <div>
-                                <RadioGroupItem value={PostType.REQUEST} id="request" className="peer sr-only" />
-                                <Label
-                                    htmlFor="request"
-                                    className="flex flex-col items-center justify-between rounded-2xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary transition-all cursor-pointer"
-                                >
-                                    <AlertCircle className="mb-3 h-6 w-6 text-orange-500" />
-                                    <span className="font-bold">Request</span>
-                                </Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
+                        )}
+                    />
 
                     {/* Image Upload Area */}
                     <div className="space-y-4">
                         <div className="flex justify-between items-end">
-                            <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                                Images {postType === PostType.DONATION && <span className="text-red-500">*</span>}
-                            </Label>
+                            <form.Subscribe
+                                selector={(state) => state.values.type}
+                                children={(type) => (
+                                    <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                                        Images {type === PostType.DONATION && <span className="text-red-500">*</span>}
+                                    </Label>
+                                )}
+                            />
                             <span className="text-xs font-medium text-muted-foreground">{selectedImages.length}/3 images</span>
                         </div>
                         
@@ -224,33 +252,46 @@ export function CreatePostForm() {
                         />
                     </div>
 
-                    {/* Form Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                                <Package className="w-3.5 h-3.5" /> Category
-                            </Label>
-                            <select
-                                {...register("category")}
-                                className="w-full h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary outline-none transition-all"
-                            >
-                                {Object.values(PostCategory).map((cat) => (
-                                    <option key={cat} value={cat}>
-                                        {cat.replace("_", " ")}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <form.Field
+                            name="category"
+                            children={(field) => (
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                        <Package className="w-3.5 h-3.5" /> Category
+                                    </Label>
+                                    <select
+                                        value={field.state.value}
+                                        onChange={(e) => field.handleChange(e.target.value as PostCategory)}
+                                        className="w-full h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary outline-none transition-all"
+                                    >
+                                        {Object.values(PostCategory).map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {cat.replace("_", " ")}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        />
 
-                        <div className="space-y-2">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Quantity</Label>
-                            <Input
-                                type="number"
-                                {...register("quantity", { valueAsNumber: true })}
-                                className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary transition-all"
-                            />
-                            {errors.quantity && <p className="text-xs text-red-500 font-medium">{errors.quantity.message}</p>}
-                        </div>
+                        <form.Field
+                            name="quantity"
+                            children={(field) => (
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Quantity</Label>
+                                    <Input
+                                        type="number"
+                                        value={field.state.value}
+                                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                                        className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary transition-all"
+                                    />
+                                    {field.state.meta.errors && (
+                                        <p className="text-xs text-red-500 font-medium">{field.state.meta.errors.join(", ")}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
                     </div>
 
                     <div className="space-y-2">
@@ -258,64 +299,105 @@ export function CreatePostForm() {
                             <MapPin className="w-3.5 h-3.5" /> Location
                         </Label>
                         <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                placeholder="Lat"
-                                type="number"
-                                step="any"
-                                {...register("latitude", { valueAsNumber: true })}
-                                className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold"
+                            <form.Field
+                                name="latitude"
+                                children={(field) => (
+                                    <Input
+                                        placeholder="Lat"
+                                        type="number"
+                                        step="any"
+                                        value={field.state.value}
+                                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                                        className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold"
+                                    />
+                                )}
                             />
-                            <Input
-                                placeholder="Lng"
-                                type="number"
-                                step="any"
-                                {...register("longitude", { valueAsNumber: true })}
-                                className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold"
+                            <form.Field
+                                name="longitude"
+                                children={(field) => (
+                                    <Input
+                                        placeholder="Lng"
+                                        type="number"
+                                        step="any"
+                                        value={field.state.value}
+                                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                                        className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold"
+                                    />
+                                )}
                             />
                         </div>
                     </div>
 
-                    {postType === PostType.REQUEST && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Title</Label>
-                                <Input
-                                    {...register("title")}
-                                    placeholder="e.g., Need dry food for 5 people"
-                                    className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary"
+                    <form.Subscribe
+                        selector={(state) => state.values.type}
+                        children={(type) => (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <form.Field
+                                    name="title"
+                                    children={(field) => (
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                                Title {type === PostType.DONATION && "(Optional)"}
+                                            </Label>
+                                            <Input
+                                                value={field.state.value || ""}
+                                                onChange={(e) => field.handleChange(e.target.value)}
+                                                placeholder={type === PostType.DONATION ? "e.g., Fresh Apples (Leave blank for AI)" : "e.g., Need dry food for 5 people"}
+                                                className="h-12 rounded-2xl border-2 border-muted bg-popover px-4 font-bold focus:border-primary"
+                                            />
+                                        </div>
+                                    )}
+                                />
+                                <form.Field
+                                    name="description"
+                                    children={(field) => (
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                                Description {type === PostType.DONATION && "(Optional)"}
+                                            </Label>
+                                            <textarea
+                                                value={field.state.value || ""}
+                                                onChange={(e) => field.handleChange(e.target.value)}
+                                                rows={4}
+                                                placeholder={type === PostType.DONATION ? "Add manual details, the AI will enhance them..." : "Explain your situation..."}
+                                                className="w-full rounded-2xl border-2 border-muted bg-popover p-4 font-bold focus:border-primary outline-none transition-all resize-none"
+                                            />
+                                        </div>
+                                    )}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</Label>
-                                <textarea
-                                    {...register("description")}
-                                    rows={4}
-                                    placeholder="Explain your situation..."
-                                    className="w-full rounded-2xl border-2 border-muted bg-popover p-4 font-bold focus:border-primary outline-none transition-all resize-none"
-                                />
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    />
 
                     <div className="pt-4">
-                        <Button 
-                            disabled={isSubmitting}
-                            className="w-full h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                            {isSubmitting ? (
-                                <div className="flex items-center gap-2">
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    {postType === PostType.DONATION ? "Analyzing & Posting..." : "Creating Post..."}
-                                </div>
-                            ) : (
-                                postType === PostType.DONATION ? "Submit Donation" : "Post Request"
+                        <form.Subscribe
+                            selector={(state) => [state.canSubmit, state.isSubmitting, state.values.type] as const}
+                            children={([canSubmit, isSubmittingForm, type]) => (
+                                <Button 
+                                    disabled={!canSubmit || isSubmitting || isSubmittingForm}
+                                    className="w-full h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    {isSubmitting || isSubmittingForm ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            {type === PostType.DONATION ? "Analyzing & Posting..." : "Creating Post..."}
+                                        </div>
+                                    ) : (
+                                        type === PostType.DONATION ? "Submit Donation" : "Post Request"
+                                    )}
+                                </Button>
                             )}
-                        </Button>
-                        <p className="mt-4 text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
-                            {postType === PostType.DONATION 
-                                ? "Our AI will analyze your first photo to generate titles, descriptions, and estimated shelf life." 
-                                : "HelpShare is a community platform. Be honest and respectful in your requests."}
-                        </p>
+                        />
+                        <form.Subscribe
+                            selector={(state) => state.values.type}
+                            children={(type) => (
+                                <p className="mt-4 text-[10px] text-center text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
+                                    {type === PostType.DONATION 
+                                        ? "Our AI will analyze your first photo to generate titles, descriptions, and estimated shelf life." 
+                                        : "HelpShare is a community platform. Be honest and respectful in your requests."}
+                                </p>
+                            )}
+                        />
                     </div>
                 </form>
             </CardContent>

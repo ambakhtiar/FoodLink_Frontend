@@ -1,19 +1,5 @@
-import axiosInstance from "@/lib/axiosInstance";
-
-export interface IPost {
-    id: string;
-    title: string;
-    description: string;
-    imageUrls: string[];
-    likesCount: number;
-    commentsCount: number;
-    isLikedByMe?: boolean;
-    author: {
-        userProfile?: { name: string };
-        organizationProfile?: { orgName: string };
-    };
-    likes?: any[];
-}
+import { apiClient as axiosInstance } from "@/lib/axios";
+import { IPost } from "@/types/post";
 
 export interface IComment {
     id: string;
@@ -28,7 +14,7 @@ export interface IComment {
     replies?: IComment[];
 }
 
-const createPost = async (formData: FormData) => {
+const createPost = async (formData: FormData): Promise<{ success: boolean; data: IPost }> => {
     const response = await axiosInstance.post("/post/create", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
@@ -37,8 +23,20 @@ const createPost = async (formData: FormData) => {
     return response.data;
 };
 
-const getPostById = async (id: string) => {
+const getPostById = async (id: string): Promise<{ success: boolean; data: IPost }> => {
     const response = await axiosInstance.get(`/post/${id}`);
+    return response.data;
+};
+
+const getAllPosts = async (params: {
+    searchTerm?: string;
+    category?: string;
+    type?: string;
+    sortBy?: string;
+    page?: number;
+    limit?: number;
+}): Promise<{ success: boolean; data: IPost[]; meta: any }> => {
+    const response = await axiosInstance.get("/post", { params });
     return response.data;
 };
 
@@ -63,6 +61,7 @@ const getComments = async (postId: string) => {
 export const postService = {
     createPost,
     getPostById,
+    getAllPosts,
     toggleLike,
     addComment,
     getComments,
