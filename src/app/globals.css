@@ -376,3 +376,9 @@
         @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
     }
 }
+
+/* ── Keyframes ─────────────────────────────────────────── */
+@keyframes shimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+}

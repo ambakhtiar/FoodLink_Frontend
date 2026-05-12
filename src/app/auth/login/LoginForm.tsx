@@ -4,21 +4,46 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-
+import { Loader2, Eye, EyeOff, Zap, User, Building2, ShieldCheck, UtensilsCrossed } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLoginMutation, useGoogleLoginMutation } from "@/hooks/useAuthMutations";
 import { useAuthStore } from "@/store/authStore";
-
-const DEMO_CREDENTIALS: LoginInput = {
-    email: "demo@foodlink.com",
-    password: "demo123",
-};
-
+import { toast } from "sonner";
 import { useGoogleLogin } from "@react-oauth/google";
+
+const DEMO_ACCOUNTS = [
+    {
+        label: "User",
+        icon: User,
+        email: "user@demo.com",
+        password: "112233",
+        colorClass: "text-blue-400",
+        ringClass: "ring-blue-500/30 hover:ring-blue-500/60",
+        bgClass: "bg-blue-500/10",
+    },
+    {
+        label: "Org",
+        icon: Building2,
+        email: "org@demo.com",
+        password: "112233",
+        colorClass: "text-cyan-400",
+        ringClass: "ring-cyan-500/30 hover:ring-cyan-500/60",
+        bgClass: "bg-cyan-500/10",
+    },
+    {
+        label: "Admin",
+        icon: ShieldCheck,
+        email: "admin@demo.com",
+        password: "112233",
+        colorClass: "text-amber-400",
+        ringClass: "ring-amber-500/30 hover:ring-amber-500/60",
+        bgClass: "bg-amber-500/10",
+    },
+];
 
 export function LoginForm() {
     const loginMutation = useLoginMutation();
@@ -28,33 +53,19 @@ export function LoginForm() {
     const router = useRouter();
 
     useEffect(() => {
-        if (isAuthenticated) {
-            router.push("/");
-        }
+        if (isAuthenticated) router.push("/");
     }, [isAuthenticated, router]);
 
     const form = useForm({
-        defaultValues: {
-            email: "",
-            password: "",
-        } as LoginInput,
-        validators: {
-            onSubmit: loginSchema,
-        },
+        defaultValues: { email: "", password: "" } as LoginInput,
+        validators: { onSubmit: loginSchema },
         onSubmit: async ({ value }: { value: LoginInput }) => {
             loginMutation.mutate(value);
         },
     });
 
-    const handleDemoLogin = () => {
-        loginMutation.mutate(DEMO_CREDENTIALS);
-    };
-
     const handleGoogleLogin = useGoogleLogin({
         onSuccess: (tokenResponse) => {
-            // The hook gives access_token. 
-            // We'll update the backend to verify it or use id_token.
-            // For now, let's assume we send the token to the backend.
             googleMutation.mutate({ googleToken: tokenResponse.access_token });
         },
         onError: () => {
@@ -62,168 +73,235 @@ export function LoginForm() {
         },
     });
 
+    const isLoading = loginMutation.isPending || googleMutation.isPending;
+
     return (
-        <div className="glass-panel-strong relative overflow-hidden rounded-[2.5rem] p-10 border-white/10 shadow-2xl">
-            <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
-
-            <div className="relative z-10 space-y-6">
-                <div className="text-center mb-8">
-                    <h2 className="text-3xl font-black tracking-tight text-foreground">
-                        Welcome Back
-                    </h2>
-                    <p className="text-muted-foreground font-medium mt-2">
-                        Enter your email and password to log in
-                    </p>
-                </div>
-
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        form.handleSubmit();
-                    }}
-                    className="space-y-5"
-                >
-                    <form.Field
-                        name="email"
-                        children={(field: any) => (
-                            <div className="space-y-2">
-                                <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
-                                    Email
-                                </Label>
-                                <Input
-                                    id={field.name}
-                                    name={field.name}
-                                    type="text"
-                                    placeholder="name@company.com"
-                                    autoComplete="email"
-                                    className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all text-lg"
-                                    value={field.state.value}
-                                    onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(e.target.value)}
-                                    disabled={loginMutation.isPending}
-                                />
-                                {field.state.meta.errors.length > 0 && (
-                                    <p className="text-xs font-bold text-destructive mt-1 ml-1">
-                                        {field.state.meta.errors.join(", ")}
-                                    </p>
-                                )}
+        <>
+            {/* Premium full-screen loading overlay */}
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-background/95 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center gap-8"
+                    >
+                        {/* Animated logo */}
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1 }}
+                            className="relative"
+                        >
+                            <div className="absolute inset-0 rounded-3xl bg-primary/20 blur-2xl scale-150" />
+                            <div className="relative bg-primary/10 border border-primary/20 rounded-3xl p-6">
+                                <UtensilsCrossed className="h-10 w-10 text-primary" />
                             </div>
-                        )}
-                    />
+                        </motion.div>
 
-                    <form.Field
-                        name="password"
-                        children={(field: any) => (
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between ml-1">
-                                    <Label htmlFor={field.name} className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-                                        Password
+                        {/* Spinner ring */}
+                        <div className="relative h-12 w-12">
+                            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+                            <div className="absolute inset-0 rounded-full border-2 border-t-primary animate-spin" />
+                        </div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-center"
+                        >
+                            <p className="text-lg font-bold tracking-tight text-foreground">Signing you in</p>
+                            <p className="text-sm text-muted-foreground mt-1">Securing your session...</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ─── Main Card ─── */}
+            <div className="glass-panel-strong overflow-hidden rounded-[2rem] border border-white/10 dark:border-white/5">
+
+                {/* Top gradient accent bar */}
+                <div className="h-1 w-full bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
+
+                <div className="p-8 space-y-6">
+                    {/* Header */}
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-black tracking-tight text-foreground">
+                            Welcome back
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Sign in to continue to FoodLink
+                        </p>
+                    </div>
+
+                    {/* Form */}
+                    <form
+                        onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}
+                        className="space-y-4"
+                    >
+                        <form.Field
+                            name="email"
+                            children={(field: any) => (
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                        Email
                                     </Label>
-                                    <Link href="/forgot-password" className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors">
-                                        Forgot Password?
-                                    </Link>
-                                </div>
-                                <div className="relative">
                                     <Input
-                                        id={field.name}
-                                        name={field.name}
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="••••••••"
-                                        autoComplete="current-password"
-                                        className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all text-lg pr-12"
+                                        id="email"
+                                        type="text"
+                                        placeholder="you@example.com"
+                                        autoComplete="email"
+                                        className="h-12 rounded-xl bg-muted/40 dark:bg-white/5 border-border dark:border-white/10 focus-visible:border-primary/60 focus-visible:ring-primary/20 text-base"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
                                         onChange={(e) => field.handleChange(e.target.value)}
-                                        disabled={loginMutation.isPending}
+                                        disabled={isLoading}
                                     />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-transparent"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        disabled={loginMutation.isPending}
-                                    >
-                                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                    </Button>
+                                    {field.state.meta.errors.length > 0 && (
+                                        <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                                    )}
                                 </div>
-                                {field.state.meta.errors.length > 0 && (
-                                    <p className="text-xs font-bold text-destructive mt-1 ml-1">
-                                        {field.state.meta.errors.join(", ")}
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    />
+                            )}
+                        />
 
-                    <Button
-                        type="submit"
-                        className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98]"
-                        disabled={loginMutation.isPending}
-                    >
-                        {loginMutation.isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                Authenticating...
-                            </>
-                        ) : (
-                            "Log In"
-                        )}
-                    </Button>
-                </form>
+                        <form.Field
+                            name="password"
+                            children={(field: any) => (
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                            Password
+                                        </Label>
+                                        <Link
+                                            href="/auth/forgot-password"
+                                            className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="••••••••"
+                                            autoComplete="current-password"
+                                            className="h-12 rounded-xl bg-muted/40 dark:bg-white/5 border-border dark:border-white/10 focus-visible:border-primary/60 focus-visible:ring-primary/20 text-base pr-12"
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) => field.handleChange(e.target.value)}
+                                            disabled={isLoading}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+                                    {field.state.meta.errors.length > 0 && (
+                                        <p className="text-xs font-medium text-destructive">{field.state.meta.errors.join(", ")}</p>
+                                    )}
+                                </div>
+                            )}
+                        />
 
-                <div className="relative my-8">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-white/5" />
-                    </div>
-                    <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em]">
-                        <span className="bg-background px-4 text-muted-foreground/60">
-                            Or continue with
-                        </span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    <Button
-                        variant="outline"
-                        type="button"
-                        className="h-14 rounded-2xl border-white/10 bg-white/5 font-bold hover:bg-white/10 transition-all"
-                        onClick={handleGoogleLogin}
-                        disabled={googleMutation.isPending}
-                    >
-                        <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                        </svg>
-                        Login with Google
-                    </Button>
-
-                    <Button
-                        variant="secondary"
-                        type="button"
-                        className="h-14 rounded-2xl bg-secondary/10 text-secondary font-bold hover:bg-secondary/20 transition-all"
-                        onClick={handleDemoLogin}
-                        disabled={loginMutation.isPending}
-                    >
-                        {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Try Demo Account
-                    </Button>
-                </div>
-
-                <div className="pt-6 text-center">
-                    <p className="text-sm font-medium text-muted-foreground">
-                        New to the movement?{" "}
-                        <Link
-                            href="/auth/register"
-                            className="text-primary font-black hover:underline underline-offset-4"
+                        <Button
+                            type="submit"
+                            className="w-full h-12 rounded-xl font-bold text-base shadow-lg shadow-primary/20"
+                            disabled={isLoading}
                         >
-                            Create Account
+                            {loginMutation.isPending
+                                ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</>
+                                : "Sign In"
+                            }
+                        </Button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="relative flex items-center gap-3">
+                        <div className="flex-1 border-t border-border dark:border-white/10" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">or</span>
+                        <div className="flex-1 border-t border-border dark:border-white/10" />
+                    </div>
+
+                    {/* Google Login */}
+                    <button
+                        type="button"
+                        onClick={() => handleGoogleLogin()}
+                        disabled={isLoading}
+                        className="w-full h-12 rounded-xl border border-border dark:border-white/10 bg-white dark:bg-white/5 hover:bg-muted/50 dark:hover:bg-white/10 transition-colors flex items-center justify-center gap-3 font-semibold text-sm text-foreground disabled:opacity-50"
+                    >
+                        {googleMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        ) : (
+                            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                            </svg>
+                        )}
+                        {googleMutation.isPending ? "Connecting..." : "Continue with Google"}
+                    </button>
+
+                    {/* Register link */}
+                    <p className="text-center text-sm text-muted-foreground">
+                        New here?{" "}
+                        <Link href="/auth/register" className="text-primary font-bold hover:text-primary/80 transition-colors">
+                            Create account
                         </Link>
                     </p>
                 </div>
+
+                {/* ─── Demo Accounts ─── */}
+                <div className="border-t border-border dark:border-white/5 bg-muted/20 dark:bg-white/[0.02] px-8 py-6">
+                    {/* Section label with line */}
+                    <div className="relative flex items-center gap-3 mb-5">
+                        <div className="flex-1 border-t border-dashed border-border dark:border-white/10" />
+                        <div className="flex items-center gap-1.5 px-2">
+                            <Zap className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground whitespace-nowrap">
+                                Demo Accounts
+                            </span>
+                        </div>
+                        <div className="flex-1 border-t border-dashed border-border dark:border-white/10" />
+                    </div>
+
+                    {/* Demo cards */}
+                    <div className="grid grid-cols-3 gap-2.5">
+                        {DEMO_ACCOUNTS.map((account) => {
+                            const Icon = account.icon;
+                            return (
+                                <button
+                                    key={account.label}
+                                    type="button"
+                                    disabled={isLoading}
+                                    onClick={() => loginMutation.mutate({ email: account.email, password: account.password })}
+                                    className={`group flex flex-col items-center gap-2 p-3.5 rounded-2xl ring-1 transition-all duration-200 disabled:opacity-40 ${account.ringClass} ${account.bgClass}`}
+                                >
+                                    <div className={`h-8 w-8 rounded-full bg-background/60 dark:bg-black/30 flex items-center justify-center ${account.colorClass}`}>
+                                        <Icon className="h-4 w-4" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className={`text-[11px] font-black uppercase tracking-wider ${account.colorClass}`}>
+                                            {account.label}
+                                        </p>
+                                        <p className="text-[9px] text-muted-foreground font-medium mt-0.5 truncate max-w-full">
+                                            {account.email}
+                                        </p>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="text-center text-[10px] text-muted-foreground mt-4">
+                        Password for all demo accounts:{" "}
+                        <code className="font-black text-foreground bg-muted dark:bg-white/10 px-1.5 py-0.5 rounded-md">112233</code>
+                    </p>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

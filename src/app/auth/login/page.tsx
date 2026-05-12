@@ -4,22 +4,32 @@ import { LoginForm } from "./LoginForm";
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 bg-background relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-3xl" />
+        <div className="min-h-screen bg-mesh flex flex-col items-center justify-center p-4 sm:p-6">
+            {/* Extra mesh blobs for depth */}
+            <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+                <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-primary/8 blur-[120px]" />
+                <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-secondary/8 blur-[120px]" />
             </div>
 
-            <div className="w-full max-w-md mx-auto space-y-8 relative z-10">
-                <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <Link href="/" className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity">
-                        <div className="bg-primary/10 p-3 rounded-2xl group-hover:bg-primary/20 transition-colors">
-                            <UtensilsCrossed className="w-8 h-8 text-primary" />
+            <div className="w-full max-w-[420px] space-y-8">
+                {/* Brand header */}
+                <div className="flex flex-col items-center gap-4 text-center">
+                    <Link href="/" className="inline-flex items-center gap-3 group">
+                        <div className="relative">
+                            <div className="absolute inset-0 rounded-2xl bg-primary/30 blur-xl scale-125 group-hover:scale-150 transition-transform duration-500" />
+                            <div className="relative bg-primary rounded-2xl p-3 shadow-lg shadow-primary/30">
+                                <UtensilsCrossed className="h-7 w-7 text-primary-foreground" />
+                            </div>
                         </div>
-                        <span className="text-3xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+                        <span className="text-3xl font-black tracking-tight text-gradient">
                             FoodLink
                         </span>
                     </Link>
+                    <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                            Connecting surplus food with those in need
+                        </p>
+                    </div>
                 </div>
 
                 <LoginForm />

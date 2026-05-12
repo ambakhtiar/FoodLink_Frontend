@@ -87,6 +87,7 @@ export function Navbar() {
 
     const handleLogout = () => {
         logout();
+        router.push("/auth/login");
         setMobileMenuOpen(false);
     };
 
@@ -142,7 +143,7 @@ export function Navbar() {
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0 border border-border hover:bg-muted">
                                         <Avatar className="h-9 w-9">
-                                            <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
+                                            <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} />
                                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                                 {user?.name?.charAt(0).toUpperCase() || "U"}
                                             </AvatarFallback>
@@ -152,7 +153,7 @@ export function Navbar() {
                                 <DropdownMenuContent className="w-64 rounded-xl p-2 border-border bg-card shadow-xl" align="end">
                                     <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-foreground/5">
                                         <Avatar className="h-10 w-10 border-2 border-primary/20">
-                                            <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
+                                            <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} />
                                             <AvatarFallback className="bg-primary/10 text-primary font-bold">
                                                 {user?.name?.charAt(0).toUpperCase() || "U"}
                                             </AvatarFallback>
@@ -219,89 +220,120 @@ export function Navbar() {
                     </div>
                 </nav>
 
-                {/* Mobile Menu Overlay */}
+                {/* Mobile Menu Side Drawer */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="absolute inset-x-0 top-full mt-2 glass-panel-strong border border-white/10 lg:hidden z-50 shadow-2xl rounded-[2rem] overflow-hidden"
-                        >
-                            <div className="space-y-1 p-6">
-                                {routes.map((route) => (
-                                    <Link
-                                        key={route.href}
-                                        href={route.href}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className={`flex items-center rounded-xl px-4 py-3 text-lg font-bold transition-all ${pathname === route.href
-                                            ? "bg-primary/10 text-primary"
-                                            : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-                                            }`}
-                                    >
-                                        {route.label}
-                                    </Link>
-                                ))}
-
-                                <div className="mt-6 pt-6 border-t border-white/5">
-                                    {showAuthenticatedUI ? (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-4 px-4 py-2 bg-foreground/5 rounded-2xl">
-                                                <Avatar className="h-12 w-12 border-2 border-primary/20">
-                                                    <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
-                                                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                                        {user?.name?.charAt(0).toUpperCase() || "U"}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-foreground truncate">{user?.name}</p>
-                                                    <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <Link
-                                                    href="/profile"
-                                                    onClick={() => setMobileMenuOpen(false)}
-                                                    className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-foreground/5 p-4 hover:bg-foreground/10 transition-colors"
-                                                >
-                                                    <User className="h-5 w-5 text-primary" />
-                                                    <span className="text-xs font-bold">Profile</span>
-                                                </Link>
-                                                <Link
-                                                    href="/dashboard"
-                                                    onClick={() => setMobileMenuOpen(false)}
-                                                    className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-foreground/5 p-4 hover:bg-foreground/10 transition-colors"
-                                                >
-                                                    <LayoutDashboard className="h-5 w-5 text-primary" />
-                                                    <span className="text-xs font-bold">Dashboard</span>
-                                                </Link>
-                                            </div>
-                                            <Button
-                                                onClick={handleLogout}
-                                                variant="destructive"
-                                                className="w-full h-12 rounded-2xl font-bold uppercase tracking-widest text-xs"
-                                            >
-                                                <LogOut className="mr-2 h-4 w-4" />
-                                                Logout
-                                            </Button>
+                        <>
+                            {/* Backdrop */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="fixed inset-0 bg-background/60 backdrop-blur-md lg:hidden z-[60]"
+                            />
+                            
+                            {/* Drawer Content */}
+                            <motion.div
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                                className="fixed right-0 top-0 h-[100dvh] w-[85%] max-w-sm bg-background lg:hidden z-[70] shadow-2xl flex flex-col border-l border-border"
+                            >
+                                <div className="flex items-center justify-between p-6 border-b border-border bg-background">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                                            <span className="text-white font-black">F</span>
                                         </div>
-                                    ) : (
-                                        <div className="grid gap-3">
-                                            <Button variant="outline" asChild className="w-full h-12 rounded-2xl border-white/10 font-bold">
-                                                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
-                                                    Sign in
-                                                </Link>
-                                            </Button>
-                                            <Button asChild className="bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/10 w-full h-12 rounded-2xl">
-                                                <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
-                                                    Register
-                                                </Link>
-                                            </Button>
-                                        </div>
-                                    )}
+                                        <span className="font-black text-foreground">Menu</span>
+                                    </div>
+                                    <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)} className="rounded-full">
+                                        <X className="h-6 w-6" />
+                                    </Button>
                                 </div>
-                            </div>
-                        </motion.div>
+
+                                <div className="flex-1 overflow-y-auto p-6 space-y-2">
+                                    {routes.map((route) => (
+                                        <Link
+                                            key={route.href}
+                                            href={route.href}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className={`flex items-center rounded-2xl px-5 py-4 text-xl font-bold transition-all ${pathname === route.href
+                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                                                }`}
+                                        >
+                                            {route.label}
+                                        </Link>
+                                    ))}
+                                    
+                                    <div className="mt-8 pt-8 border-t border-white/5">
+                                        {showAuthenticatedUI ? (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-4 p-4 bg-foreground/5 rounded-[1.5rem]">
+                                                    <Avatar className="h-14 w-14 border-2 border-primary/20">
+                                                        <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} />
+                                                        <AvatarFallback className="bg-primary/10 text-primary font-black">
+                                                            {user?.name?.charAt(0).toUpperCase() || "U"}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="min-w-0">
+                                                        <p className="font-black text-foreground truncate">{user?.name}</p>
+                                                        <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <Link
+                                                        href="/profile"
+                                                        onClick={() => setMobileMenuOpen(false)}
+                                                        className="flex flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-foreground/5 p-6 hover:bg-foreground/10 transition-colors group"
+                                                    >
+                                                        <User className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">Profile</span>
+                                                    </Link>
+                                                    <Link
+                                                        href="/dashboard"
+                                                        onClick={() => setMobileMenuOpen(false)}
+                                                        className="flex flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-foreground/5 p-6 hover:bg-foreground/10 transition-colors group"
+                                                    >
+                                                        <LayoutDashboard className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                                                        <span className="text-[10px] font-black uppercase tracking-widest">Dash</span>
+                                                    </Link>
+                                                </div>
+                                                <Button
+                                                    onClick={handleLogout}
+                                                    className="w-full h-14 rounded-2xl bg-destructive hover:bg-destructive/90 font-black uppercase tracking-[0.2em] text-xs shadow-lg shadow-destructive/20"
+                                                >
+                                                    <LogOut className="mr-2 h-4 w-4" />
+                                                    Logout
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="grid gap-4">
+                                                <Button variant="outline" asChild className="w-full h-14 rounded-2xl border-white/10 font-bold">
+                                                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                                                        Sign in
+                                                    </Link>
+                                                </Button>
+                                                <Button asChild className="bg-primary hover:bg-primary/90 font-black shadow-lg shadow-primary/20 w-full h-14 rounded-2xl">
+                                                    <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
+                                                        Register Now
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="p-6 border-t border-white/5 flex justify-center gap-4">
+                                    <ThemeToggle />
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 flex items-center">
+                                        FoodLink v1.0
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
                     )}
                 </AnimatePresence>
             </div>

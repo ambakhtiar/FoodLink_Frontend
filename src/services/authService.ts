@@ -69,4 +69,35 @@ export const authService = {
         const { data: response } = await apiClient.post<ApiResponse<null>>("/auth/reset-password", data);
         return { message: response.message };
     },
+
+    async completeProfile(data: { phone: string; latitude: number; longitude: number }): Promise<AuthResponse> {
+        const { data: response } = await apiClient.post<ApiResponse<{ accessToken: string }>>("/auth/complete-profile", data);
+        
+        useAuthStore.getState().setAuth({} as User, response.data.accessToken);
+        const { data: profileResponse } = await apiClient.get<ApiResponse<User>>("/auth/me");
+
+        return {
+            user: profileResponse.data,
+            token: response.data.accessToken
+        };
+    },
+
+    async updateProfile(data: any): Promise<{ message: string; data: any }> {
+        const isFormData = data instanceof FormData;
+        const { data: response } = await apiClient.patch<ApiResponse<any>>(
+            "/user/update-profile", 
+            data,
+            {
+                headers: {
+                    'Content-Type': isFormData ? 'multipart/form-data' : 'application/json'
+                }
+            }
+        );
+        return { message: response.message, data: response.data };
+    },
+
+    async changePassword(data: any): Promise<{ message: string }> {
+        const { data: response } = await apiClient.patch<ApiResponse<null>>("/auth/change-password", data);
+        return { message: response.message };
+    },
 };

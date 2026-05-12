@@ -91,22 +91,28 @@ export default function ForgotPasswordForm() {
                     <form onSubmit={(e) => { e.preventDefault(); requestForm.handleSubmit(); }} className="space-y-6">
                         <div className="space-y-2">
                             <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input 
-                                    placeholder="name@example.com" 
-                                    className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
-                                    value={requestForm.state.values.email}
-                                    onChange={(e) => requestForm.setFieldValue("email", e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <requestForm.Field
+                                name="email"
+                                children={(field) => (
+                                    <div className="relative">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input 
+                                            placeholder="name@example.com" 
+                                            className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) => field.handleChange(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            />
                         </div>
                         <Button 
                             className="w-full h-14 rounded-2xl bg-primary font-black uppercase tracking-widest"
                             disabled={forgotPasswordMutation.isPending}
                         >
-                            {forgotPasswordMutation.isPending ? <Loader2 className="animate-spin h-5 w-5" /> : "Send Security Code"}
+                            {forgotPasswordMutation.isPending ? <Loader2 className="animate-spin h-5 w-5" /> : "Send OTP"}
                         </Button>
                     </form>
                 )}
@@ -115,17 +121,23 @@ export default function ForgotPasswordForm() {
                     <form onSubmit={(e) => { e.preventDefault(); verifyForm.handleSubmit(); }} className="space-y-6">
                         <div className="space-y-2">
                             <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">6-Digit Code</Label>
-                            <div className="relative">
-                                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input 
-                                    placeholder="000000" 
-                                    className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg tracking-[0.5em] font-black"
-                                    maxLength={6}
-                                    value={verifyForm.state.values.otp}
-                                    onChange={(e) => verifyForm.setFieldValue("otp", e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <verifyForm.Field
+                                name="otp"
+                                children={(field) => (
+                                    <div className="relative">
+                                        <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input 
+                                            placeholder="000000" 
+                                            className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg tracking-[0.5em] font-black"
+                                            maxLength={6}
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) => field.handleChange(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            />
                         </div>
                         <Button 
                             className="w-full h-14 rounded-2xl bg-primary font-black uppercase tracking-widest"
@@ -147,31 +159,43 @@ export default function ForgotPasswordForm() {
                     <form onSubmit={(e) => { e.preventDefault(); resetForm.handleSubmit(); }} className="space-y-5">
                         <div className="space-y-2">
                             <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">New Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input 
-                                    type="password"
-                                    placeholder="••••••••" 
-                                    className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
-                                    value={resetForm.state.values.password}
-                                    onChange={(e) => resetForm.setFieldValue("password", e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <resetForm.Field
+                                name="password"
+                                children={(field) => (
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input 
+                                            type="password"
+                                            placeholder="••••••••" 
+                                            className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) => field.handleChange(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Confirm Password</Label>
-                            <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                <Input 
-                                    type="password"
-                                    placeholder="••••••••" 
-                                    className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
-                                    value={resetForm.state.values.confirmPassword}
-                                    onChange={(e) => resetForm.setFieldValue("confirmPassword", e.target.value)}
-                                    required
-                                />
-                            </div>
+                            <resetForm.Field
+                                name="confirmPassword"
+                                children={(field) => (
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                        <Input 
+                                            type="password"
+                                            placeholder="••••••••" 
+                                            className="h-14 pl-12 rounded-2xl bg-white/5 border-white/10 focus:border-primary/50 text-lg"
+                                            value={field.state.value}
+                                            onBlur={field.handleBlur}
+                                            onChange={(e) => field.handleChange(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                            />
                         </div>
                         <Button 
                             className="w-full h-14 rounded-2xl bg-primary font-black uppercase tracking-widest"

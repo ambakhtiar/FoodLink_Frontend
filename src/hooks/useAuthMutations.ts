@@ -17,13 +17,11 @@ export function useLoginMutation() {
       setAuth(data.user, data.token);
       toast.success("Login successful!");
       
-      // Attempt to find callbackUrl from query params if possible, otherwise default to Home
       const searchParams = new URLSearchParams(window.location.search);
       const callbackUrl = searchParams.get("callbackUrl");
       router.push(callbackUrl || "/");
     },
     onError: (error: any) => {
-      // Backend error message or fallback
       const message = error.response?.data?.message || error.message || "Login failed. Please try again.";
       toast.error(message);
     },
@@ -56,9 +54,13 @@ export function useGoogleLoginMutation() {
       setAuth(data.user, data.token);
       toast.success("Google login successful!");
       
-      const searchParams = new URLSearchParams(window.location.search);
-      const callbackUrl = searchParams.get("callbackUrl");
-      router.push(callbackUrl || "/");
+      if (data.user.status === "INCOMPLETE_PROFILE") {
+        router.push("/auth/complete-profile");
+      } else {
+        const searchParams = new URLSearchParams(window.location.search);
+        const callbackUrl = searchParams.get("callbackUrl");
+        router.push(callbackUrl || "/");
+      }
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || error.message || "Google login failed. Please try again.";
@@ -66,6 +68,59 @@ export function useGoogleLoginMutation() {
     },
   });
 }
+
+export function useCompleteProfileMutation() {
+  const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  return useMutation({
+    mutationFn: (data: { phone: string; latitude: number; longitude: number }) => authService.completeProfile(data),
+    onSuccess: (data: AuthResponse) => {
+      setAuth(data.user, data.token);
+      toast.success("Profile completed successfully!");
+      router.push("/");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || "Failed to complete profile.";
+      toast.error(message);
+    },
+  });
+}
+
+export function useUpdateProfileMutation() {
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+
+  return useMutation({
+    mutationFn: (data: any) => authService.updateProfile(data),
+    onSuccess: (response: { message: string; data: any }) => {
+      if (user && token) {
+        const updatedUser = { ...user, ...response.data };
+        setAuth(updatedUser as any, token);
+      }
+      toast.success(response.message || "Profile updated!");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || "Update failed.";
+      toast.error(message);
+    },
+  });
+}
+
+export function useChangePasswordMutation() {
+  return useMutation({
+    mutationFn: (data: any) => authService.changePassword(data),
+    onSuccess: (data: { message: string }) => {
+      toast.success(data.message || "Password changed successfully!");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || "Failed to change password.";
+      toast.error(message);
+    },
+  });
+}
+
 export function useForgotPasswordMutation() {
   return useMutation({
     mutationFn: (email: string) => authService.forgotPassword(email),

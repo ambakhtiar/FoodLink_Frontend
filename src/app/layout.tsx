@@ -5,6 +5,7 @@ import "./globals.css";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { ProfileGuard } from "@/components/shared/ProfileGuard";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -46,7 +47,9 @@ export default function RootLayout({
                             enableSystem
                             disableTransitionOnChange
                         >
-                            {children}
+                            <ProfileGuard>
+                                {children}
+                            </ProfileGuard>
                             <Toaster />
                         </ThemeProvider>
                     </QueryProvider>

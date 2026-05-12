@@ -32,25 +32,35 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             status: null,
             isHydrated: false,
-            setAuth: (user, token) =>
+            setAuth: (user, token) => {
+                // Write a lightweight cookie so the server-side proxy can detect auth
+                if (typeof document !== "undefined") {
+                    document.cookie = `fl_auth=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                }
                 set({
                     user,
                     token,
                     isAuthenticated: true,
                     status: user.status || "active",
-                }),
+                });
+            },
             updateUser: (userData) =>
                 set((state) => ({
                     user: state.user ? { ...state.user, ...userData } : null,
                     status: userData.status || state.status,
                 })),
-            logout: () =>
+            logout: () => {
+                // Clear the auth cookie
+                if (typeof document !== "undefined") {
+                    document.cookie = "fl_auth=; path=/; max-age=0; SameSite=Lax";
+                }
                 set({
                     user: null,
                     token: null,
                     isAuthenticated: false,
                     status: null,
-                }),
+                });
+            },
             setHydrated: (hydrated) => set({ isHydrated: hydrated }),
         }),
         {
