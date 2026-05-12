@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { FULL_APP_NAME } from "@/lib/constants";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ export function CTASection() {
 
             <p className="mb-8 text-lg text-muted-foreground leading-relaxed max-w-xl">
               Whether you are a food business with surplus meals or an NGO
-              feeding the hungry, FoodLink connects you to create impact that lasts.
+              feeding the hungry, {FULL_APP_NAME} connects you to create impact that lasts.
             </p>
 
             <div className="flex flex-wrap gap-4">

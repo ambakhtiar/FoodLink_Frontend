@@ -13,6 +13,7 @@ import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { useLoginMutation, useGoogleLoginMutation } from "@/hooks/useAuthMutations";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
+import { FULL_APP_NAME } from "@/lib/constants";
 import { useGoogleLogin } from "@react-oauth/google";
 
 const DEMO_ACCOUNTS = [
@@ -77,46 +78,6 @@ export function LoginForm() {
 
     return (
         <>
-            {/* Premium full-screen loading overlay */}
-            <AnimatePresence>
-                {isLoading && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-background/95 backdrop-blur-3xl z-[100] flex flex-col items-center justify-center gap-8"
-                    >
-                        {/* Animated logo */}
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.1 }}
-                            className="relative"
-                        >
-                            <div className="absolute inset-0 rounded-3xl bg-primary/20 blur-2xl scale-150" />
-                            <div className="relative bg-primary/10 border border-primary/20 rounded-3xl p-6">
-                                <UtensilsCrossed className="h-10 w-10 text-primary" />
-                            </div>
-                        </motion.div>
-
-                        {/* Spinner ring */}
-                        <div className="relative h-12 w-12">
-                            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
-                            <div className="absolute inset-0 rounded-full border-2 border-t-primary animate-spin" />
-                        </div>
-
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-center"
-                        >
-                            <p className="text-lg font-bold tracking-tight text-foreground">Signing you in</p>
-                            <p className="text-sm text-muted-foreground mt-1">Securing your session...</p>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
             {/* ─── Main Card ─── */}
             <div className="glass-panel-strong overflow-hidden rounded-[2rem] border border-white/10 dark:border-white/5">
@@ -131,7 +92,7 @@ export function LoginForm() {
                             Welcome back
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                            Sign in to continue to FoodLink
+                            Sign in to continue to {FULL_APP_NAME}
                         </p>
                     </div>
 

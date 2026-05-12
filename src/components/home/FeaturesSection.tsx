@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { FULL_APP_NAME } from "@/lib/constants";
 import { Camera, MapPin, Shield, Zap, Clock, Bell } from "lucide-react";
 
 const features = [
@@ -80,7 +81,7 @@ export function FeaturesSection() {
             Intelligent Platform
           </motion.span>
           <h2 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl lg:text-3xl">
-            How FoodLink <span className="text-blue-200">Empowers</span> You
+            How {FULL_APP_NAME} <span className="text-blue-200">Empowers</span> You
           </h2>
           <p className="mt-2 max-w-2xl mx-auto text-sm text-blue-100/90 leading-relaxed">
             Experience the future of food rescue with our cutting-edge AI-driven 

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { FULL_APP_NAME } from "@/lib/constants";
 import { Star, Quote } from "lucide-react";
 
 const testimonials = [
@@ -9,7 +10,7 @@ const testimonials = [
     role: "NGO Director",
     organization: "Food for All Foundation",
     content:
-      "FoodLink has revolutionized how we collect surplus food. We now receive real-time alerts and have rescued over 5,000 meals this month alone.",
+      `"${FULL_APP_NAME} has revolutionized how we collect surplus food. We now receive real-time alerts and have rescued over 5,000 meals this month alone."`,
     rating: 5,
     avatar: "FR",
   },
@@ -27,7 +28,7 @@ const testimonials = [
     role: "Volunteer Coordinator",
     organization: "Youth Against Hunger",
     content:
-      "The trust score system gives us confidence in every donation. We've helped feed over 200 families through FoodLink's intelligent matching system.",
+      `"The trust score system gives us confidence in every donation. We've helped feed over 200 families through ${FULL_APP_NAME}'s intelligent matching system."`,
     rating: 5,
     avatar: "SI",
   },

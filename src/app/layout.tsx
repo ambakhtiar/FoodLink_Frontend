@@ -6,6 +6,7 @@ import { QueryProvider } from "@/lib/QueryProvider";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ProfileGuard } from "@/components/shared/ProfileGuard";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -18,8 +19,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "FoodLink - Connecting Food Donors with Receivers",
-    description: "A platform to reduce food waste by connecting food donors with organizations in need.",
+    title: {
+        default: FULL_APP_NAME,
+        template: `%s | ${FULL_APP_NAME}`,
+    },
+    description: `${FULL_APP_NAME} - Connecting Surplus to Sustenance. A platform for reducing food waste and helping those in need.`,
 };
 
 
@@ -50,7 +54,7 @@ export default function RootLayout({
                             <ProfileGuard>
                                 {children}
                             </ProfileGuard>
-                            <Toaster />
+                            <Toaster richColors position="top-right" />
                         </ThemeProvider>
                     </QueryProvider>
                 </GoogleOAuthProvider>

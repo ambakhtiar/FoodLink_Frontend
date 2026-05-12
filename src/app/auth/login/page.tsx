@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UtensilsCrossed } from "lucide-react";
 import { LoginForm } from "./LoginForm";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export default function LoginPage() {
     return (
@@ -22,7 +23,7 @@ export default function LoginPage() {
                             </div>
                         </div>
                         <span className="text-3xl font-black tracking-tight text-gradient">
-                            FoodLink
+                            {FULL_APP_NAME}
                         </span>
                     </Link>
                     <div>

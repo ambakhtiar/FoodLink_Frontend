@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { APP_NAME_FF, APP_NAME_SS, FULL_APP_NAME, APP_MOTTO } from "@/lib/constants";
 
 const footerLinks = {
   product: [
@@ -31,10 +32,10 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { href: "https://facebook.com/foodlink", label: "Facebook", icon: Facebook },
-  { href: "https://twitter.com/foodlink", label: "Twitter", icon: Twitter },
-  { href: "https://instagram.com/foodlink", label: "Instagram", icon: Instagram },
-  { href: "https://linkedin.com/company/foodlink", label: "LinkedIn", icon: Linkedin },
+  { href: "https://facebook.com/helpshare", label: "Facebook", icon: Facebook },
+  { href: "https://twitter.com/helpshare", label: "Twitter", icon: Twitter },
+  { href: "https://instagram.com/helpshare", label: "Instagram", icon: Instagram },
+  { href: "https://linkedin.com/company/helpshare", label: "LinkedIn", icon: Linkedin },
 ];
 
 export function Footer() {
@@ -48,19 +49,19 @@ export function Footer() {
             <Link href="/" className="group flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-md shadow-primary/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30">
                 <span className="text-lg font-black text-primary-foreground">
-                    {process.env.NEXT_PUBLIC_APP_NAME_FF?.charAt(0) || "F"}
+                    {APP_NAME_FF.charAt(0)}
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black tracking-tight text-foreground leading-none">
-                  {process.env.NEXT_PUBLIC_APP_NAME_FF || "Food"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
+                  {APP_NAME_FF}<span className="text-primary">{APP_NAME_SS}</span>
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-none mt-0.5">Zero Hunger</span>
+                <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground leading-none mt-0.5">{APP_MOTTO}</span>
               </div>
             </Link>
 
             <p className="mt-6 text-sm text-muted-foreground leading-relaxed max-w-[260px]">
-              Connecting food donors with organizations in need. Together, we&apos;re reducing waste and fighting hunger.
+              Connecting donors with organizations in need. Together, we&apos;re reducing waste and fighting hunger.
             </p>
 
             {/* Social Links */}
@@ -107,9 +108,9 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground mb-5">Contact</h3>
             <div className="space-y-3.5">
-              <a href="mailto:contact@foodlink.org" className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-primary">
+              <a href="mailto:contact@helpshare.org" className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-primary">
                 <Mail className="h-4 w-4 shrink-0 text-primary/60" />
-                contact@foodlink.org
+                contact@helpshare.org
               </a>
               <a href="tel:+8801234567890" className="flex items-center gap-2.5 text-sm text-muted-foreground transition-colors hover:text-primary">
                 <Phone className="h-4 w-4 shrink-0 text-primary/60" />
@@ -127,7 +128,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-border flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} <span className="font-medium text-foreground">{process.env.NEXT_PUBLIC_APP_NAME_FF || "Food"}{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>. All rights reserved.
+            &copy; {new Date().getFullYear()} <span className="font-medium text-foreground">{FULL_APP_NAME}</span>. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             Made with

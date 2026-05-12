@@ -1,15 +1,24 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type AccountStatus = "active" | "suspended" | "pending" | "inactive";
+export type AccountStatus = "active" | "suspended" | "pending" | "inactive" | "INCOMPLETE_PROFILE";
 
 export interface User {
     id: string;
     email: string;
     name: string;
-    role: "donor" | "receiver" | "admin";
+    role: "USER" | "ORGANIZATION" | "ADMIN";
     status?: AccountStatus;
-    avatar?: string;
+    profilePictureUrl?: string;
+    phone?: string;
+    latitude?: number;
+    longitude?: number;
+    authProvider?: string;
+    profile?: {
+        orgName?: string;
+        establishedYear?: number;
+        registrationNumber?: string;
+    };
 }
 
 interface AuthState {
@@ -64,7 +73,7 @@ export const useAuthStore = create<AuthState>()(
             setHydrated: (hydrated) => set({ isHydrated: hydrated }),
         }),
         {
-            name: "foodlink-auth",
+            name: "helpshare-auth",
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 user: state.user,

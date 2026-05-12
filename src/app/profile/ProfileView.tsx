@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/authStore";
 import { useUpdateProfileMutation } from "@/hooks/useAuthMutations";
 import { toast } from "sonner";
+import { FULL_APP_NAME } from "@/lib/constants";
+
+import { ProfilePictureForm } from "@/components/profile/ProfilePictureForm";
 
 export default function ProfileView() {
     const user = useAuthStore((state) => state.user);
@@ -48,85 +51,14 @@ export default function ProfileView() {
                     {/* Cover Decorations */}
                     <div className="absolute top-8 right-8 flex gap-3">
                         <div className="px-4 py-2 rounded-full glass-panel-strong text-[10px] font-black uppercase tracking-widest text-white/80 border-white/5 shadow-xl">
-                            FoodLink Verified
+                            {FULL_APP_NAME} Verified
                         </div>
                     </div>
                 </div>
 
                 {/* Avatar - Positioned outside overflow-hidden wrapper */}
                 <div className="absolute -bottom-16 left-8 md:left-16 z-20">
-                    <div className="relative">
-                        {/* Avatar Circle */}
-                        <div className="relative group">
-                            <Avatar className="h-40 w-40 md:h-52 md:w-52 border-[8px] border-background shadow-[0_20px_60px_rgba(0,0,0,0.5)] bg-background">
-                                <AvatarImage src={user.profilePictureUrl || ""} alt={user.name} className="object-cover" />
-                                <AvatarFallback className="text-6xl font-black bg-gradient-to-br from-primary to-secondary text-white">
-                                    {user.name?.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            {/* Upload overlay on hover */}
-                            <button
-                                type="button"
-                                onClick={() => document.getElementById('avatar-upload')?.click()}
-                                className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm"
-                            >
-                                <Camera className="h-8 w-8 text-white" />
-                                <span className="text-white text-[10px] font-bold mt-1">Change</span>
-                            </button>
-                        </div>
-
-                        {/* Remove photo button */}
-                        {user.profilePictureUrl && (
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    try {
-                                        await updateProfileMutation.mutateAsync({ profilePictureUrl: "" });
-                                        toast.success("Profile picture removed");
-                                    } catch {
-                                        toast.error("Failed to remove picture");
-                                    }
-                                }}
-                                className="absolute -top-1 -right-1 h-8 w-8 rounded-full bg-destructive text-white flex items-center justify-center shadow-lg hover:bg-destructive/90 transition-colors"
-                                title="Remove photo"
-                            >
-                                <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                        )}
-
-                        {/* Upload in progress indicator */}
-                        {updateProfileMutation.isPending && (
-                            <div className="absolute inset-0 rounded-full bg-background/70 flex items-center justify-center">
-                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                            </div>
-                        )}
-
-                        <input
-                            id="avatar-upload"
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                if (file.size > 5 * 1024 * 1024) {
-                                    toast.error("Image must be under 5MB");
-                                    return;
-                                }
-                                const formData = new FormData();
-                                formData.append('profilePicture', file);
-                                toast.promise(
-                                    updateProfileMutation.mutateAsync(formData),
-                                    {
-                                        loading: 'Uploading photo...',
-                                        success: 'Profile photo updated!',
-                                        error: 'Upload failed. Try again.',
-                                    }
-                                );
-                                e.target.value = "";
-                            }}
-                        />
-                    </div>
+                    <ProfilePictureForm />
                 </div>
             </div>
 

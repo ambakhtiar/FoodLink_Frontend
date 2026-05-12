@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import CompleteProfileForm from "./CompleteProfileForm";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-    title: "Complete Profile | FoodLink",
+    title: `Complete Profile | ${FULL_APP_NAME}`,
     description: "Please provide your phone and location to complete your registration.",
 };
 

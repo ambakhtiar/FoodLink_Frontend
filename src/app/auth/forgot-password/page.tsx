@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-    title: "Recover Access | FoodLink",
-    description: "Reset your password and regain access to your FoodLink account.",
+    title: `Recover Access | ${FULL_APP_NAME}`,
+    description: `Reset your password and regain access to your ${FULL_APP_NAME} account.`,
 };
 
 export default function ForgotPasswordPage() {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCompleteProfileMutation } from "@/hooks/useAuthMutations";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export default function CompleteProfileForm() {
     const completeProfileMutation = useCompleteProfileMutation();
@@ -40,7 +41,7 @@ export default function CompleteProfileForm() {
                         Finish Setup
                     </h2>
                     <p className="text-muted-foreground font-medium mt-2">
-                        Just a few more details to get started with FoodLink
+                        Just a few more details to get started with {FULL_APP_NAME}
                     </p>
                 </div>
 

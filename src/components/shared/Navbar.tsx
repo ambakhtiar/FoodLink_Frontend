@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User, LayoutDashboard, Settings, LogOut, Sun, Moon } from "lucide-react";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { APP_NAME_FF, APP_NAME_SS, FULL_APP_NAME } from "@/lib/constants";
 
 function ThemeToggle() {
     const { theme, setTheme } = useTheme();
@@ -71,6 +72,7 @@ export function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
     const { isAuthenticated, isHydrated, user, logout } = useAuth();
 
     useEffect(() => {
@@ -104,15 +106,15 @@ export function Navbar() {
                         <Link href="/" className="group flex items-center gap-2.5">
                             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
                                 <span className="text-lg font-black text-white">
-                                    {process.env.NEXT_PUBLIC_APP_NAME_FF?.charAt(0) || "F"}
+                                    {APP_NAME_FF.charAt(0)}
                                 </span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-lg font-black tracking-tight text-foreground">
-                                    {process.env.NEXT_PUBLIC_APP_NAME_FF || "Food"}<span className="text-primary">{process.env.NEXT_PUBLIC_APP_NAME_SS || "Link"}</span>
+                                    {APP_NAME_FF}<span className="text-primary">{APP_NAME_SS}</span>
                                 </span>
                                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80 leading-none">
-                                    {process.env.NEXT_PUBLIC_APP_MOTTO || "Zero Hunger"}
+                                    Unused to Needed
                                 </span>
                             </div>
                         </Link>
@@ -329,7 +331,7 @@ export function Navbar() {
                                 <div className="p-6 border-t border-white/5 flex justify-center gap-4">
                                     <ThemeToggle />
                                     <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 flex items-center">
-                                        FoodLink v1.0
+                                        HelpShare v1.0
                                     </div>
                                 </div>
                             </motion.div>

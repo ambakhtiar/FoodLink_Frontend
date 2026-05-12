@@ -5,10 +5,11 @@ import { ProfileSkeleton } from "@/components/shared/skeletons/ProfileSkeleton";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-    title: "My Profile | FoodLink",
-    description: "Manage your FoodLink profile and activity.",
+    title: `My Profile | ${FULL_APP_NAME}`,
+    description: `Manage your ${FULL_APP_NAME} profile and activity.`,
 };
 
 export default function ProfilePage() {

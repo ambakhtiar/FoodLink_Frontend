@@ -4,9 +4,10 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Settings, Shield } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { FULL_APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
-    title: "Account Settings | FoodLink",
+    title: `Account Settings | ${FULL_APP_NAME}`,
     description: "Manage your account security and preferences.",
 };
 
