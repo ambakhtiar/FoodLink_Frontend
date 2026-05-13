@@ -140,7 +140,12 @@ export function Navbar() {
                     <div className="hidden lg:flex lg:items-center lg:gap-4">
                         <ThemeToggle />
 
-                        {showAuthenticatedUI ? (
+                        {!isHydrated ? (
+                            <div className="flex items-center gap-3 animate-pulse">
+                                <div className="h-10 w-20 rounded-full bg-muted"></div>
+                                <div className="h-10 w-24 rounded-full bg-muted"></div>
+                            </div>
+                        ) : showAuthenticatedUI ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0 border border-border hover:bg-muted">
@@ -271,7 +276,12 @@ export function Navbar() {
                                     ))}
                                     
                                     <div className="mt-8 pt-8 border-t border-white/5">
-                                        {showAuthenticatedUI ? (
+                                        {!isHydrated ? (
+                                            <div className="space-y-4 animate-pulse">
+                                                <div className="h-14 w-full rounded-2xl bg-muted"></div>
+                                                <div className="h-14 w-full rounded-2xl bg-muted"></div>
+                                            </div>
+                                        ) : showAuthenticatedUI ? (
                                             <div className="space-y-6">
                                                 <div className="flex items-center gap-4 p-4 bg-foreground/5 rounded-[1.5rem]">
                                                     <Avatar className="h-14 w-14 border-2 border-primary/20">

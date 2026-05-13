@@ -1,0 +1,40 @@
+﻿../foodlink-backend/src/app/modules/auth/auth.controller.ts(115,60): error TS2379: Argument of type '{ userAgent: string | undefined; ipAddress: string | undefined; }' is not assignable to parameter of type '{ userAgent?: string; ipAddress?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'userAgent' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+../foodlink-backend/src/app/modules/auth/auth.controller.ts(139,72): error TS2379: Argument of type '{ userAgent: string | undefined; ipAddress: string | undefined; }' is not assignable to parameter of type '{ userAgent?: string; ipAddress?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'userAgent' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+../foodlink-backend/src/app/modules/auth/auth.service.ts(164,9): error TS2375: Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type '(Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput) | (Without<...> & SessionCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'userAgent' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | null'.
+          Type 'undefined' is not assignable to type 'string | null'.
+../foodlink-backend/src/app/modules/auth/auth.service.ts(398,9): error TS2375: Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type '(Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput) | (Without<...> & SessionCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'userAgent' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | null'.
+          Type 'undefined' is not assignable to type 'string | null'.
+../foodlink-backend/src/app/modules/auth/auth.service.ts(463,9): error TS2375: Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type '(Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput) | (Without<...> & SessionCreateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'Without<SessionCreateInput, SessionUncheckedCreateInput> & SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type '{ userId: string; refreshToken: string; userAgent: string | undefined; ipAddress: string | undefined; expiresAt: Date; }' is not assignable to type 'SessionUncheckedCreateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'userAgent' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | null'.
+          Type 'undefined' is not assignable to type 'string | null'.
+../foodlink-backend/src/app/modules/post/post.service.ts(41,67): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+../foodlink-backend/src/app/modules/post/post.service.ts(270,9): error TS2375: Type 'Partial<{ id: string; status: PostStatus; createdAt: Date; authorId: string; type: PostType; category: PostCategory; title: string; description: string; ... 8 more ...; commentsCount: number; }>' is not assignable to type '(Without<PostUpdateInput, PostUncheckedUpdateInput> & PostUncheckedUpdateInput) | (Without<...> & PostUpdateInput)' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'Partial<{ id: string; status: PostStatus; createdAt: Date; authorId: string; type: PostType; category: PostCategory; title: string; description: string; ... 8 more ...; commentsCount: number; }>' is not assignable to type 'Without<PostUncheckedUpdateInput, PostUpdateInput> & PostUpdateInput' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type 'Partial<{ id: string; status: PostStatus; createdAt: Date; authorId: string; type: PostType; category: PostCategory; title: string; description: string; ... 8 more ...; commentsCount: number; }>' is not assignable to type 'Without<PostUncheckedUpdateInput, PostUpdateInput>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Types of property 'authorId' are incompatible.
+        Type 'string' is not assignable to type 'never'.
+../foodlink-backend/src/app/modules/transaction/transaction.service.ts(46,40): error TS2339: Property 'PENDING' does not exist on type '{ AVAILABLE: "AVAILABLE"; PENDING_HANDOVER: "PENDING_HANDOVER"; COMPLETED: "COMPLETED"; EXPIRED: "EXPIRED"; }'.
+../foodlink-backend/src/app/utils/cronJobs.ts(12,31): error TS2322: Type '"PENDING"' is not assignable to type 'PostStatus'.
+../foodlink-backend/src/app/utils/mailHelper.ts(27,13): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(mailOptions: Options & Partial<Options>): Promise<SentMessageInfo>', gave the following error.
+    Type 'unknown' is not assignable to type 'string | Readable | Buffer<ArrayBufferLike> | AttachmentLike | undefined'.
+  Overload 2 of 4, '(mailOptions: Options): Promise<SentMessageInfo>', gave the following error.
+    Type 'unknown' is not assignable to type 'string | Readable | Buffer<ArrayBufferLike> | AttachmentLike | undefined'.
