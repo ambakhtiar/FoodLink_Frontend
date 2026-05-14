@@ -5,7 +5,7 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 
 // Routes where the footer should be hidden
-const NO_FOOTER_ROUTES = ["/feed"];
+const NO_FOOTER_ROUTES = ["/feed", "/post/create"];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();

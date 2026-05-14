@@ -13,6 +13,29 @@ export enum PostCategory {
     OTHERS = 'OTHERS',
 }
 
+export interface ITransactionReview {
+    reviewerId: string;
+}
+
+export interface ITransactionActor {
+    id: string;
+    profilePictureUrl?: string | null;
+    userProfile?: { name: string; impactScore?: number } | null;
+    organizationProfile?: { orgName: string; impactScore?: number } | null;
+}
+
+export interface ITransactionRequest {
+    id: string;
+    postId: string;
+    actorId: string;
+    quantity: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
+    message: string | null;
+    createdAt: string;
+    actor?: ITransactionActor;
+    reviews?: ITransactionReview[];
+}
+
 export interface IPost {
     id: string;
     authorId: string;
@@ -24,16 +47,17 @@ export interface IPost {
     quantity: number;
     latitude: number;
     longitude: number;
-    status: 'AVAILABLE' | 'PENDING' | 'COMPLETED' | 'EXPIRED';
+    status: 'AVAILABLE' | 'PENDING_HANDOVER' | 'COMPLETED' | 'EXPIRED';
     likesCount: number;
     commentsCount: number;
     createdAt: string;
     estimatedShelfLife?: string;
     isLikedByMe?: boolean;
+    transactionRequests?: ITransactionRequest[];
     author: {
         id: string;
-        profilePictureUrl?: string;
-        userProfile?: { name: string; impactScore?: number };
-        organizationProfile?: { orgName: string; impactScore?: number };
+        profilePictureUrl?: string | null;
+        userProfile?: { name: string; impactScore?: number } | null;
+        organizationProfile?: { orgName: string; impactScore?: number } | null;
     };
 }

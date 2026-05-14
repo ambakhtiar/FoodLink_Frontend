@@ -58,6 +58,11 @@ const getComments = async (postId: string) => {
     return response.data;
 };
 
+const deleteComment = async (commentId: string) => {
+    const response = await axiosInstance.delete(`/post/comment/${commentId}`);
+    return response.data;
+};
+
 export const postService = {
     createPost,
     getPostById,
@@ -65,4 +70,5 @@ export const postService = {
     toggleLike,
     addComment,
     getComments,
+    deleteComment,
 };

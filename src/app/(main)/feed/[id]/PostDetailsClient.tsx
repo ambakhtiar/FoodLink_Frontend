@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { postService } from "@/services/postService";
-import { IPost } from "@/types/post";
+import { IPost, ITransactionRequest } from "@/types/post";
 import { IComment } from "@/services/postService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
     Heart, MessageSquare, Share2, MapPin, Calendar,
     Package, Clock, MoreHorizontal, Loader2, Send, Reply, ZoomIn,
-    ShieldCheck, ArrowRight, ChevronDown, ChevronUp
+    ShieldCheck, CheckCircle2, Star, ChevronDown, ChevronUp, Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
@@ -19,6 +19,17 @@ import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { Lightbox, useLightbox } from "@/components/ui/Lightbox";
+import { transactionService } from "@/services/transactionService";
+import { ReviewDialog } from "@/components/post/ReviewDialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function PostDetailsClient() {
     const { id } = useParams() as { id: string };
@@ -34,6 +45,12 @@ export default function PostDetailsClient() {
     const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
     const [commentText, setCommentText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isRequesting, setIsRequesting] = useState(false);
+    const [requestNote, setRequestNote] = useState("");
+    const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+    const [isResponding, setIsResponding] = useState<string | null>(null);
+    const [isCompleting, setIsCompleting] = useState(false);
+    const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
 
     // Fetch post
     useEffect(() => {
@@ -107,6 +124,75 @@ export default function PostDetailsClient() {
             toast.error("Failed to post comment");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            await postService.deleteComment(commentId);
+            toast.success("Comment deleted");
+            setComments(prev => {
+                const isRoot = prev.some(c => c.id === commentId);
+                if (isRoot) return prev.filter(c => c.id !== commentId);
+                return prev.map(c => ({
+                    ...c,
+                    replies: c.replies?.filter(r => r.id !== commentId)
+                }));
+            });
+        } catch (err) {
+            toast.error("Failed to delete comment");
+        }
+    };
+
+    const handleRequestItem = async () => {
+        if (!user) {
+            toast.error("Please login to request items");
+            return;
+        }
+        try {
+            setIsRequesting(true);
+            await transactionService.requestItem({
+                postId: id,
+                quantity: post?.quantity.toString() || "1",
+                deliveryNote: requestNote
+            });
+            toast.success("Request sent successfully!");
+            setIsRequestDialogOpen(false);
+            const r = await postService.getPostById(id);
+            setPost(r.data);
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to request item");
+        } finally {
+            setIsRequesting(false);
+        }
+    };
+
+    const handleRespondRequest = async (transactionId: string, status: 'APPROVED' | 'REJECTED') => {
+        try {
+            setIsResponding(transactionId);
+            await transactionService.respondToRequest({ transactionId, status });
+            toast.success(`Request ${status.toLowerCase()} successfully`);
+            const r = await postService.getPostById(id);
+            setPost(r.data);
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || `Failed to ${status.toLowerCase()} request`);
+        } finally {
+            setIsResponding(null);
+        }
+    };
+
+    const handleCompleteTransaction = async (transactionId: string) => {
+        try {
+            setIsCompleting(true);
+            await transactionService.completeTransaction(transactionId);
+            toast.success("Transaction marked as completed!");
+            const r = await postService.getPostById(id);
+            setPost(r.data);
+        } catch (err: unknown) {
+            const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to complete transaction";
+            toast.error(message);
+        } finally {
+            setIsCompleting(false);
         }
     };
 
@@ -281,12 +367,156 @@ export default function PostDetailsClient() {
                                 />
                                 <DetailItem icon={MapPin} label="Location" value="View on map" />
                             </div>
-                            {isDonation && (
-                                <Button className="w-full mt-5 h-11 rounded-xl font-bold text-sm gap-2 shadow-md shadow-primary/20">
-                                    <ShieldCheck className="w-4 h-4" />
-                                    Request This Donation
-                                </Button>
-                            )}
+                            {(() => {
+                                const approvedReq = post.transactionRequests?.find(
+                                    (r: ITransactionRequest) => r.status === "APPROVED" || r.status === "COMPLETED"
+                                );
+                                const isAuthor = user?.id === post.authorId;
+                                const isApprovedActor = approvedReq?.actorId === user?.id;
+                                const isInvolved = isAuthor || isApprovedActor;
+                                const authorName = post.author.userProfile?.name || post.author.organizationProfile?.orgName || "the author";
+                                const actorName = approvedReq?.actor?.userProfile?.name || approvedReq?.actor?.organizationProfile?.orgName || "the requester";
+                                const revieweeName = isAuthor ? actorName : authorName;
+                                const revieweeId = isAuthor ? (approvedReq?.actorId ?? "") : post.authorId;
+                                const alreadyReviewed = approvedReq?.reviews?.some(
+                                    (rv) => rv.reviewerId === user?.id
+                                ) ?? false;
+
+                                return (
+                                    <>
+                                        {/* ── Owner View: Requests list ── */}
+                                        {isAuthor && (
+                                            <div className="mt-6 pt-6 border-t border-border/40">
+                                                <h3 className="text-sm font-black mb-4">Requests ({post.transactionRequests?.length || 0})</h3>
+                                                {post.transactionRequests && post.transactionRequests.length > 0 ? (
+                                                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                                                        {post.transactionRequests.map((req: ITransactionRequest) => {
+                                                            const reqUser = req.actor?.userProfile || req.actor?.organizationProfile;
+                                                            const reqName = (reqUser as { name?: string; orgName?: string })?.name || (reqUser as { orgName?: string })?.orgName || "User";
+                                                            const isPending = req.status === "PENDING";
+
+                                                            return (
+                                                                <div key={req.id} className="p-3 rounded-xl bg-muted/40 border border-border/40 text-sm">
+                                                                    <div className="flex justify-between items-start mb-2">
+                                                                        <div className="font-bold flex items-center gap-2">
+                                                                            {reqName}
+                                                                            <span className="text-[10px] px-2 py-0.5 rounded-full border border-border bg-background">{req.status}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    {req.message && (
+                                                                        <p className="text-xs text-muted-foreground mb-3 italic">&ldquo;{req.message}&rdquo;</p>
+                                                                    )}
+                                                                    {isPending && (
+                                                                        <div className="flex gap-2">
+                                                                            <Button
+                                                                                size="sm"
+                                                                                onClick={() => handleRespondRequest(req.id, "APPROVED")}
+                                                                                disabled={isResponding === req.id || post.status !== "AVAILABLE"}
+                                                                                className="h-8 flex-1 text-xs"
+                                                                            >
+                                                                                Accept
+                                                                            </Button>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                variant="outline"
+                                                                                onClick={() => handleRespondRequest(req.id, "REJECTED")}
+                                                                                disabled={isResponding === req.id}
+                                                                                className="h-8 flex-1 text-xs"
+                                                                            >
+                                                                                Reject
+                                                                            </Button>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-muted-foreground italic">No requests yet.</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* ── Receiver View: Request button ── */}
+                                        {!isAuthor && post.status === "AVAILABLE" && (
+                                            <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button className="w-full mt-5 h-11 rounded-xl font-bold text-sm gap-2 shadow-md shadow-primary/20">
+                                                        <ShieldCheck className="w-4 h-4" />
+                                                        Request This Item
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Request Item</DialogTitle>
+                                                        <DialogDescription>
+                                                            Please provide a delivery note or address for the author.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <textarea
+                                                        value={requestNote}
+                                                        onChange={(e) => setRequestNote(e.target.value)}
+                                                        placeholder="E.g., I can pick this up tomorrow at 10 AM..."
+                                                        rows={4}
+                                                        className="w-full bg-muted/50 rounded-xl p-3 text-sm outline-none border border-transparent focus:border-primary/40 transition-all resize-none"
+                                                    />
+                                                    <DialogFooter>
+                                                        <Button variant="ghost" onClick={() => setIsRequestDialogOpen(false)}>Cancel</Button>
+                                                        <Button onClick={handleRequestItem} disabled={isRequesting}>
+                                                            {isRequesting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                                                            Send Request
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        )}
+
+                                        {/* ── Mark as Completed (PENDING_HANDOVER) ── */}
+                                        {post.status === "PENDING_HANDOVER" && isInvolved && approvedReq && (
+                                            <Button
+                                                className="w-full mt-5 h-11 rounded-xl font-bold text-sm gap-2 bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20"
+                                                onClick={() => handleCompleteTransaction(approvedReq.id)}
+                                                disabled={isCompleting}
+                                            >
+                                                {isCompleting
+                                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                    : <CheckCircle2 className="w-4 h-4" />}
+                                                Mark as Handed Over
+                                            </Button>
+                                        )}
+
+                                        {/* ── Leave a Review (COMPLETED) ── */}
+                                        {post.status === "COMPLETED" && isInvolved && !alreadyReviewed && approvedReq && (
+                                            <>
+                                                <Button
+                                                    className="w-full mt-5 h-11 rounded-xl font-bold text-sm gap-2 bg-amber-500 hover:bg-amber-600 shadow-md shadow-amber-500/20"
+                                                    onClick={() => setIsReviewDialogOpen(true)}
+                                                >
+                                                    <Star className="w-4 h-4" />
+                                                    Leave a Review for {revieweeName}
+                                                </Button>
+                                                <ReviewDialog
+                                                    transactionId={approvedReq.id}
+                                                    revieweeId={revieweeId}
+                                                    revieweeName={revieweeName}
+                                                    open={isReviewDialogOpen}
+                                                    onOpenChange={setIsReviewDialogOpen}
+                                                    onSuccess={async () => {
+                                                        const r = await postService.getPostById(id);
+                                                        setPost(r.data);
+                                                    }}
+                                                />
+                                            </>
+                                        )}
+
+                                        {post.status === "COMPLETED" && isInvolved && alreadyReviewed && (
+                                            <p className="mt-5 text-xs text-center text-emerald-600 font-semibold flex items-center justify-center gap-1.5">
+                                                <CheckCircle2 className="w-3.5 h-3.5" /> You have already reviewed this transaction.
+                                            </p>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
 
@@ -327,6 +557,7 @@ export default function PostDetailsClient() {
                                                 setReplyTo({ id: cId, name });
                                                 commentInputRef.current?.focus();
                                             }}
+                                            onDelete={handleDeleteComment}
                                         />
                                     ))}
                                 </AnimatePresence>
@@ -408,15 +639,25 @@ export default function PostDetailsClient() {
 }
 
 /* ── CommentThread (1-level deep) ────────────────────────────────────────────── */
-function CommentThread({ comment, onReply }: { comment: IComment; onReply: (id: string, name: string) => void }) {
+function CommentThread({
+    comment,
+    onReply,
+    onDelete
+}: {
+    comment: IComment;
+    onReply: (id: string, name: string) => void;
+    onDelete: (id: string) => void;
+}) {
+    const { user } = useAuthStore();
     const name = comment.user.userProfile?.name || comment.user.organizationProfile?.orgName || "User";
     const [showReplies, setShowReplies] = useState(true);
+    const isOwner = user?.id === comment.userId;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-2"
+            className="group/thread space-y-2"
         >
             {/* Parent comment */}
             <div className="flex gap-2.5">
@@ -426,9 +667,18 @@ function CommentThread({ comment, onReply }: { comment: IComment; onReply: (id: 
                     </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                    <div className="bg-muted/50 rounded-2xl px-3.5 py-2.5">
+                    <div className="bg-muted/50 rounded-2xl px-3.5 py-2.5 relative group">
                         <p className="text-xs font-bold">{name}</p>
                         <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{comment.content}</p>
+                        {isOwner && (
+                            <button
+                                onClick={() => onDelete(comment.id)}
+                                className="absolute top-2 right-2 p-1.5 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                title="Delete comment"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                        )}
                     </div>
                     <div className="flex items-center gap-3 px-1 mt-1">
                         <span className="text-[10px] text-muted-foreground/60">
@@ -464,12 +714,14 @@ function CommentThread({ comment, onReply }: { comment: IComment; onReply: (id: 
                     >
                         {comment.replies.map((reply) => {
                             const rName = reply.user.userProfile?.name || reply.user.organizationProfile?.orgName || "User";
+                            const isReplyOwner = user?.id === reply.userId;
+
                             return (
                                 <motion.div
                                     key={reply.id}
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    className="flex gap-2"
+                                    className="flex gap-2 group"
                                 >
                                     <Avatar className="w-7 h-7 shrink-0 mt-0.5">
                                         <AvatarFallback className="bg-secondary/10 text-secondary text-[9px] font-bold">
@@ -477,9 +729,18 @@ function CommentThread({ comment, onReply }: { comment: IComment; onReply: (id: 
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
-                                        <div className="bg-muted/40 rounded-2xl px-3 py-2">
+                                        <div className="bg-muted/40 rounded-2xl px-3 py-2 relative">
                                             <p className="text-[11px] font-bold">{rName}</p>
                                             <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{reply.content}</p>
+                                            {isReplyOwner && (
+                                                <button
+                                                    onClick={() => onDelete(reply.id)}
+                                                    className="absolute top-1.5 right-1.5 p-1 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Delete reply"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
+                                            )}
                                         </div>
                                         <p className="text-[10px] text-muted-foreground/50 px-1 mt-0.5">
                                             {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
