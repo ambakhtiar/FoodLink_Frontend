@@ -40,7 +40,6 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </AuthGuard>
     );
 }

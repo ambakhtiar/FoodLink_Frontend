@@ -33,8 +33,7 @@ export function useRegisterMutation() {
 
   return useMutation({
     mutationFn: (data: RegisterInput) => authService.registerUser(data),
-    onSuccess: (data: { message: string }) => {
-      toast.success(data.message || "Registration successful! Please login.");
+    onSuccess: () => {
       router.push("/auth/login");
     },
     onError: (error: any) => {

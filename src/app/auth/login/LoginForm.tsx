@@ -106,13 +106,13 @@ export function LoginForm() {
                             children={(field: any) => (
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                                        Email
+                                        Email or Phone Number
                                     </Label>
                                     <Input
                                         id="email"
                                         type="text"
-                                        placeholder="you@example.com"
-                                        autoComplete="email"
+                                        placeholder="you@example.com or +8801..."
+                                        autoComplete="username"
                                         className="h-12 rounded-xl bg-muted/40 dark:bg-white/5 border-border dark:border-white/10 focus-visible:border-primary/60 focus-visible:ring-primary/20 text-base"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}

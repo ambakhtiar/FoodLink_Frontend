@@ -4,18 +4,18 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 
-// Routes where the footer should be hidden
-const NO_FOOTER_ROUTES = ["/feed", "/post/create"];
+// Routes where the footer should be visible
+const FOOTER_VISIBLE_ROUTES = ["/", "/about", "/contact"];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const hideFooter = NO_FOOTER_ROUTES.some((route) => pathname.startsWith(route));
+    const showFooter = FOOTER_VISIBLE_ROUTES.includes(pathname);
 
     return (
         <>
             <Navbar />
             <main className="flex-1">{children}</main>
-            {!hideFooter && <Footer />}
+            {showFooter && <Footer />}
         </>
     );
 }

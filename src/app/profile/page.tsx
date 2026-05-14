@@ -23,7 +23,6 @@ export default function ProfilePage() {
                     </Suspense>
                 </div>
             </main>
-            <Footer />
         </AuthGuard>
     );
 }

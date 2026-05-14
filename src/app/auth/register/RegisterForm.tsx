@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,9 @@ import {
   type UserRegisterInput,
   type OrgRegisterInput,
 } from "@/lib/validations/auth";
-import { useRegisterMutation } from "@/hooks/useAuthMutations";
+import { useRegisterMutation, useLoginMutation } from "@/hooks/useAuthMutations";
 import { useAuthStore } from "@/store/authStore";
+import { toast } from "sonner";
 
 type RegisterFormValues =
   | (Omit<UserRegisterInput, "role"> & { role: "USER" })
@@ -25,7 +26,9 @@ type RegisterFormValues =
 
 export function RegisterForm() {
   const registerMutation = useRegisterMutation();
+  const loginMutation = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
 
@@ -40,7 +43,7 @@ export function RegisterForm() {
       role: "USER",
       email: "",
       password: "",
-      phone: "",
+      phone: "+880",
       name: "",
       orgName: "",
       latitude: 0,
@@ -52,9 +55,40 @@ export function RegisterForm() {
       onSubmit: registerSchema,
     },
     onSubmit: async ({ value }: { value: RegisterFormValues }) => {
-      registerMutation.mutate(value as UserRegisterInput | OrgRegisterInput);
+      registerMutation.mutate(value as UserRegisterInput | OrgRegisterInput, {
+        onSuccess: () => {
+          if (value.role === "USER") {
+            loginMutation.mutate({ email: value.email, password: value.password });
+          } else {
+            toast.success("Account created successfully. Waiting for admin approval.");
+            router.push("/auth/login");
+          }
+        }
+      });
     },
   });
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        form.setFieldValue("latitude", parseFloat(position.coords.latitude.toFixed(6)));
+        form.setFieldValue("longitude", parseFloat(position.coords.longitude.toFixed(6)));
+        toast.success("Location updated successfully!");
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error(error);
+        toast.error("Failed to get location. Please enter manually.");
+        setIsLocating(false);
+      }
+    );
+  };
 
   const role = form.getFieldValue("role");
 
@@ -144,7 +178,7 @@ export function RegisterForm() {
                     />
                     {field.state.meta.errors.length > 0 && (
                       <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
-                        {field.state.meta.errors.join(", ")}
+                        {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
                       </p>
                     )}
                   </div>
@@ -169,7 +203,7 @@ export function RegisterForm() {
                     />
                     {field.state.meta.errors.length > 0 && (
                       <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
-                        {field.state.meta.errors.join(", ")}
+                        {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
                       </p>
                     )}
                   </div>
@@ -196,7 +230,7 @@ export function RegisterForm() {
                   />
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
-                      {field.state.meta.errors.join(", ")}
+                      {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
                     </p>
                   )}
                 </div>
@@ -217,12 +251,19 @@ export function RegisterForm() {
                     className="h-12 rounded-xl bg-white/5 border-white/10 focus:border-primary/50 transition-all"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.startsWith("+880") && val.length <= 14) {
+                        field.handleChange(val);
+                      } else if (!val.startsWith("+880")) {
+                        field.handleChange("+880");
+                      }
+                    }}
                     disabled={registerMutation.isPending}
                   />
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
-                      {field.state.meta.errors.join(", ")}
+                      {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
                     </p>
                   )}
                 </div>
@@ -260,7 +301,7 @@ export function RegisterForm() {
                   </div>
                   {field.state.meta.errors.length > 0 && (
                     <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
-                      {field.state.meta.errors.join(", ")}
+                      {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
                     </p>
                   )}
                 </div>
@@ -272,8 +313,19 @@ export function RegisterForm() {
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-white/5" />
             </div>
-            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-              <span className="bg-background px-4 text-muted-foreground/60">Location Details</span>
+            <div className="relative flex justify-between items-center bg-background px-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Location Details</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleGetCurrentLocation}
+                disabled={isLocating || registerMutation.isPending}
+                className="h-8 rounded-full bg-primary/10 text-primary hover:bg-primary/20 gap-2 px-3 transition-all"
+              >
+                {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
+                <span className="text-[10px] font-bold uppercase tracking-wider">Use My Location</span>
+              </Button>
             </div>
           </div>
 
@@ -298,6 +350,11 @@ export function RegisterForm() {
                     }
                     disabled={registerMutation.isPending}
                   />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
+                      {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
+                    </p>
+                  )}
                 </div>
               )}
             />
@@ -321,6 +378,11 @@ export function RegisterForm() {
                     }
                     disabled={registerMutation.isPending}
                   />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
+                      {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
+                    </p>
+                  )}
                 </div>
               )}
             />
@@ -351,6 +413,11 @@ export function RegisterForm() {
                         }
                         disabled={registerMutation.isPending}
                       />
+                      {field.state.meta.errors.length > 0 && (
+                        <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
+                          {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
+                        </p>
+                      )}
                     </div>
                   )}
                 />
@@ -373,6 +440,11 @@ export function RegisterForm() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         disabled={registerMutation.isPending}
                       />
+                      {field.state.meta.errors.length > 0 && (
+                        <p className="text-[10px] font-bold text-destructive mt-1 ml-1">
+                          {field.state.meta.errors.map((err: any) => typeof err === 'string' ? err : err?.message || 'Invalid value').join(", ")}
+                        </p>
+                      )}
                     </div>
                   )}
                 />

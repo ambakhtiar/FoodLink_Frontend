@@ -54,7 +54,7 @@ export default function RootLayout({
                             <ProfileGuard>
                                 {children}
                             </ProfileGuard>
-                            <Toaster richColors position="top-right" />
+                            <Toaster richColors position="top-right" closeButton />
                         </ThemeProvider>
                     </QueryProvider>
                 </GoogleOAuthProvider>

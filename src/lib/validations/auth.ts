@@ -26,10 +26,13 @@ const baseRegisterSchema = z.object({
         .string()
         .min(1, "Password is required")
         .min(6, "Password must be at least 6 characters"),
-    phone: z.string().min(1, "Phone number is required"),
+    phone: z
+        .string()
+        .min(1, "Phone number is required")
+        .regex(/^\+8801[3-9]\d{8}$/, "Invalid Bangladeshi number (e.g., +8801XXXXXXXXX)"),
     role: z.nativeEnum(UserRole),
-    latitude: z.number(),
-    longitude: z.number(),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
 });
 
 // User register schema (name required)
