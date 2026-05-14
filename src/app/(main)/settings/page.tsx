@@ -1,7 +1,5 @@
 import { Metadata } from "next";
-import ChangePasswordForm from "./ChangePasswordForm";
-import { Navbar } from "@/components/shared/Navbar";
-import { Footer } from "@/components/shared/Footer";
+import ChangePasswordForm from "@/components/settings/ChangePasswordForm";
 import { Settings, Shield } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { FULL_APP_NAME } from "@/lib/constants";
@@ -14,7 +12,6 @@ export const metadata: Metadata = {
 export default function SettingsPage() {
     return (
         <AuthGuard>
-            <Navbar />
             <main className="min-h-screen bg-background pt-24 pb-20">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-4 mb-10">

@@ -29,6 +29,7 @@ export const metadata: Metadata = {
 
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ForcePasswordChangeModal } from "@/components/shared/ForcePasswordChangeModal";
 
 export default function RootLayout({
     children,
@@ -51,6 +52,7 @@ export default function RootLayout({
                             enableSystem
                             disableTransitionOnChange
                         >
+                            <ForcePasswordChangeModal />
                             <ProfileGuard>
                                 {children}
                             </ProfileGuard>

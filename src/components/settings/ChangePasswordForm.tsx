@@ -24,10 +24,15 @@ export default function ChangePasswordForm() {
                 toast.error("New passwords do not match");
                 return;
             }
+            if (value.currentPassword === value.newPassword) {
+                toast.error("New password cannot be the same as the current password");
+                return;
+            }
             await changePasswordMutation.mutateAsync({
                 currentPassword: value.currentPassword,
                 newPassword: value.newPassword,
             });
+            useAuthStore.getState().updateUser({ needsPasswordChange: false });
             form.reset();
         },
     });
@@ -121,13 +126,22 @@ export default function ChangePasswordForm() {
                 </div>
 
                 <div className="flex justify-end pt-4">
-                    <Button 
-                        type="submit" 
-                        className="rounded-xl px-10 font-black uppercase tracking-widest h-12"
-                        disabled={changePasswordMutation.isPending}
-                    >
-                        {changePasswordMutation.isPending ? <Loader2 className="animate-spin h-4 w-4" /> : "Update Password"}
-                    </Button>
+                    <form.Subscribe
+                        selector={(state) => state.values}
+                        children={(values) => {
+                            const isRigidDisabled = !values.currentPassword || !values.newPassword || !values.confirmPassword || changePasswordMutation.isPending;
+                            return (
+                                <Button 
+                                    type="submit" 
+                                    className="rounded-xl px-10 font-black uppercase tracking-widest h-12"
+                                    disabled={isRigidDisabled}
+                                >
+                                    {changePasswordMutation.isPending ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
+                                    {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                                </Button>
+                            );
+                        }}
+                    />
                 </div>
             </form>
         </div>

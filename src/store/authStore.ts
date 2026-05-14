@@ -14,6 +14,7 @@ export interface User {
     latitude?: number;
     longitude?: number;
     authProvider?: string;
+    needsPasswordChange?: boolean;
     profile?: {
         orgName?: string;
         establishedYear?: number;

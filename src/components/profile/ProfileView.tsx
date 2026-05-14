@@ -11,7 +11,8 @@ import {
     Star, 
     Activity, 
     User as UserIcon,
-    ShoppingBag
+    ShoppingBag,
+    MapPin
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,25 @@ export default function ProfileView() {
     if (!user) return null;
 
     const impactScore = user.profile?.impactScore || 0;
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by your browser");
+            return;
+        }
+
+        toast.loading("Detecting location...", { id: "location-toast" });
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                form.setFieldValue("latitude", position.coords.latitude);
+                form.setFieldValue("longitude", position.coords.longitude);
+                toast.success("Location updated successfully", { id: "location-toast" });
+            },
+            (error) => {
+                toast.error("Please enable location access in your browser.", { id: "location-toast" });
+            }
+        );
+    };
 
     return (
         <div className="space-y-8 pb-20">
@@ -235,7 +255,19 @@ export default function ProfileView() {
                                         )}
 
                                         <div className="space-y-3">
-                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Location (Lat/Long)</Label>
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Location (Lat/Long)</Label>
+                                                {isEditing && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleGetLocation}
+                                                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                                                    >
+                                                        <MapPin className="h-3 w-3" />
+                                                        Use My Location
+                                                    </button>
+                                                )}
+                                            </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <form.Field
                                                     name="latitude"
