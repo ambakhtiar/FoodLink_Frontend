@@ -252,13 +252,22 @@ export default function PostDetailsClient() {
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
                                             <span className="font-semibold text-sm">{authorName}</span>
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isDonation
                                                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                                     : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                                                 }`}>
                                                 {isDonation ? "🍱 Donating" : "🙏 Requesting"}
+                                            </span>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                                post.status === 'AVAILABLE' 
+                                                    ? "bg-primary/5 text-primary border-primary/20" 
+                                                    : post.status === 'COMPLETED'
+                                                    ? "bg-muted text-muted-foreground border-border"
+                                                    : "bg-amber-500/5 text-amber-600 border-amber-500/20"
+                                            }`}>
+                                                {post.status?.replace(/_/g, " ")}
                                             </span>
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-0.5">{timeAgo}</p>
@@ -294,9 +303,19 @@ export default function PostDetailsClient() {
                                                 src={url}
                                                 alt={`Image ${i + 1}`}
                                                 fill
-                                                className="object-cover group-hover:brightness-95 transition-all"
+                                                className={`object-cover group-hover:brightness-95 transition-all ${
+                                                    post.status === 'COMPLETED' ? 'grayscale opacity-60' : ''
+                                                }`}
                                                 sizes="(max-width: 768px) 100vw, 600px"
                                             />
+                                            {post.status === 'COMPLETED' && i === 0 && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                                                    <div className="bg-white/90 dark:bg-black/80 px-6 py-2 rounded-full shadow-2xl border border-white/20 flex items-center gap-2 scale-110">
+                                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                                        <span className="text-xs font-black uppercase tracking-widest text-foreground">Successfully Donated</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
                                                 <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-80 transition-opacity drop-shadow" />
                                             </div>
@@ -367,13 +386,17 @@ export default function PostDetailsClient() {
                             <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Post Details</h2>
                             <div className="grid grid-cols-2 gap-3">
                                 <DetailItem icon={Package} label="Category" value={post.category.replace(/_/g, " ")} />
-                                <DetailItem icon={Clock} label="Quantity" value={`${post.quantity} items`} />
+                                <DetailItem icon={Clock} label="Quantity" value={`${post.quantity} ${isDonation ? "Available" : "Needed"}`} />
                                 <DetailItem
                                     icon={Calendar}
                                     label="Expires"
                                     value={post.estimatedShelfLife ? format(new Date(post.estimatedShelfLife), "PP") : "N/A"}
                                 />
-                                <DetailItem icon={MapPin} label="Location" value="View on map" />
+                                <DetailItem 
+                                    icon={CheckCircle2} 
+                                    label="Status" 
+                                    value={post.status?.replace(/_/g, " ")} 
+                                />
                             </div>
                             {(() => {
                                 const approvedReq = post.transactionRequests?.find(

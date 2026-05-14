@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     Heart, MessageSquare, Share2, MoreHorizontal,
-    Image as ImageIcon, Send, Loader2, ArrowRight, ZoomIn
+    Image as ImageIcon, Send, Loader2, ArrowRight, ZoomIn, Package, CheckCircle2, Clock, AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -92,15 +92,27 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                 {/* ── Header ─────────────────────────────────────── */}
                 <div className="flex items-start justify-between px-4 pt-4 pb-3">
                     <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 ring-2 ring-primary/10">
-                            <AvatarImage src={initialPost.author.profilePictureUrl || ""} alt={authorName} />
-                            <AvatarFallback className="bg-primary/10 text-primary font-black text-sm">
-                                {authorName.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
+                        <Link 
+                            href={user?.id === initialPost.author.id ? "/profile" : `/profile/${initialPost.author.id}`}
+                            className="no-click shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <Avatar className="h-10 w-10 ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
+                                <AvatarImage src={initialPost.author.profilePictureUrl || ""} alt={authorName} />
+                                <AvatarFallback className="bg-primary/10 text-primary font-black text-sm">
+                                    {authorName.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
                         <div>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-semibold text-sm">{authorName}</span>
+                                <Link 
+                                    href={user?.id === initialPost.author.id ? "/profile" : `/profile/${initialPost.author.id}`}
+                                    className="no-click font-semibold text-sm hover:text-primary transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {authorName}
+                                </Link>
                                 {impactScore > 0 && (
                                     <span className="text-[10px] font-bold text-primary/70 bg-primary/8 px-1.5 py-0.5 rounded-full">
                                         ⭐ {impactScore}
@@ -116,6 +128,15 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                                         : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                                 }`}>
                                     {isDonation ? "🍱 Donating" : "🙏 Requesting"}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                                    initialPost.status === 'AVAILABLE' 
+                                        ? "bg-primary/5 text-primary border-primary/20" 
+                                        : initialPost.status === 'COMPLETED'
+                                        ? "bg-muted text-muted-foreground border-border"
+                                        : "bg-amber-500/5 text-amber-600 border-amber-500/20"
+                                }`}>
+                                    {initialPost.status?.replace(/_/g, " ")}
                                 </span>
                             </div>
                         </div>
@@ -137,11 +158,17 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                             {initialPost.description}
                         </p>
                     )}
-                    {initialPost.category && (
-                        <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-primary/70 bg-primary/6 px-2 py-0.5 rounded-full border border-primary/10">
-                            {initialPost.category.replace(/_/g, " ")}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {initialPost.category && (
+                            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-primary/70 bg-primary/6 px-2 py-0.5 rounded-full border border-primary/10">
+                                {initialPost.category.replace(/_/g, " ")}
+                            </span>
+                        )}
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+                            <Package className="w-3 h-3" />
+                            {initialPost.quantity} {isDonation ? "Available" : "Needed"}
                         </span>
-                    )}
+                    </div>
                 </div>
 
                 {/* ── Image ──────────────────────────────────────── */}
@@ -155,9 +182,19 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                             src={images[0]}
                             alt={initialPost.title || "Post image"}
                             fill
-                            className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                            className={`object-cover group-hover:scale-[1.02] transition-transform duration-500 ${
+                                initialPost.status === 'COMPLETED' ? 'grayscale opacity-60' : ''
+                            }`}
                             sizes="(max-width: 768px) 100vw, 680px"
                         />
+                        {initialPost.status === 'COMPLETED' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                                <div className="bg-white/90 dark:bg-black/80 px-6 py-2 rounded-full shadow-2xl border border-white/20 flex items-center gap-2 scale-110">
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                    <span className="text-xs font-black uppercase tracking-widest text-foreground">Successfully Donated</span>
+                                </div>
+                            </div>
+                        )}
                         {images.length > 1 && (
                             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <ImageIcon className="w-2.5 h-2.5" />

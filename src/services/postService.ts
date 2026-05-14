@@ -33,6 +33,7 @@ const getAllPosts = async (params: {
     category?: string;
     type?: string;
     sortBy?: string;
+    userId?: string;
     page?: number;
     limit?: number;
 }): Promise<{ success: boolean; data: IPost[]; meta: any }> => {
@@ -66,6 +67,11 @@ const deleteComment = async (commentId: string) => {
 const getMyPosts = async (params: {
     page?: number;
     limit?: number;
+    searchTerm?: string;
+    type?: string;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
 }): Promise<{ success: boolean; data: IPost[]; meta: any }> => {
     const response = await axiosInstance.get("/post/my-posts", { params });
     return response.data;

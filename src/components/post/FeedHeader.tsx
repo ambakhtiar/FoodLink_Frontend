@@ -16,45 +16,48 @@ export function FeedHeader() {
         <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6"
         >
-            <Card className="rounded-[2rem] border-none shadow-2xl shadow-primary/5 bg-card/50 backdrop-blur-xl overflow-hidden">
-                <CardContent className="p-6 space-y-4">
+            <div className="rounded-2xl border border-border/40 bg-card/40 backdrop-blur-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-6 space-y-6">
                     <div className="flex items-center gap-4">
                         <Link href="/profile">
-                            <Avatar className="h-12 w-12 border-2 border-primary/20 hover:scale-105 transition-transform">
-                                <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} />
-                                <AvatarFallback className="bg-primary/10 text-primary font-black">
-                                    {user?.name?.charAt(0).toUpperCase() || "U"}
-                                </AvatarFallback>
-                            </Avatar>
+                            <div className="relative group">
+                                <Avatar className="h-12 w-12 border-2 border-primary/20 group-hover:border-primary/40 transition-all shadow-lg shadow-primary/5">
+                                    <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} className="object-cover" />
+                                    <AvatarFallback className="bg-gradient-to-br from-primary/10 to-secondary/10 text-primary font-black">
+                                        {user?.name?.charAt(0).toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full shadow-sm" />
+                            </div>
                         </Link>
                         <Link 
                             href="/post/create" 
-                            className="flex-1 h-12 bg-muted/50 rounded-full px-6 flex items-center text-muted-foreground font-bold hover:bg-muted transition-colors"
+                            className="flex-1 h-12 bg-white/5 rounded-full px-6 flex items-center text-muted-foreground/60 font-bold hover:bg-white/[0.08] hover:text-foreground transition-all border border-white/5 shadow-inner"
                         >
                             What's on your mind, {user?.name?.split(" ")[0]}?
                         </Link>
                     </div>
                     
-                    <div className="h-[1px] bg-border/50 mx-2" />
+                    <div className="h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent mx-4" />
                     
-                    <div className="flex items-center justify-between px-2">
-                        <ActionButton icon={Video} label="Live Video" color="text-red-500" />
-                        <ActionButton icon={ImageIcon} label="Photo/Video" color="text-green-500" />
-                        <ActionButton icon={Smile} label="Feeling/Activity" color="text-orange-500" />
+                    <div className="flex items-center justify-around px-2">
+                        <ActionButton icon={Video} label="Live Video" color="text-rose-500" />
+                        <ActionButton icon={ImageIcon} label="Photo/Video" color="text-emerald-500" />
+                        <ActionButton icon={Smile} label="Activity" color="text-amber-500" />
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </motion.div>
     );
 }
 
 function ActionButton({ icon: Icon, label, color }: { icon: any, label: string, color: string }) {
     return (
-        <Link href="/post/create" className="flex items-center gap-2.5 px-4 py-2 rounded-xl hover:bg-muted transition-colors group">
+        <Link href="/post/create" className="flex items-center gap-2.5 px-6 py-2.5 rounded-2xl hover:bg-white/5 transition-all group">
             <Icon className={`w-5 h-5 ${color} group-hover:scale-110 transition-transform`} />
-            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">{label}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
         </Link>
     );
 }

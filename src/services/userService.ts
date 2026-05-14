@@ -23,4 +23,9 @@ export const userService = {
         const { data } = await apiClient.delete<ApiResponse<null>>("/user/profile-picture");
         return data;
     },
+
+    async getPublicProfile(userId: string): Promise<ApiResponse<any>> {
+        const { data } = await apiClient.get<ApiResponse<any>>(`/user/public-profile/${userId}`);
+        return data;
+    },
 };
