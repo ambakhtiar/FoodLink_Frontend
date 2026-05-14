@@ -18,6 +18,7 @@ export interface User {
         orgName?: string;
         establishedYear?: number;
         registrationNumber?: string;
+        impactScore?: number;
     };
 }
 

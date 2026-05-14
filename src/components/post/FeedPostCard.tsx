@@ -21,6 +21,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 export function FeedPostCard({ post: initialPost }: { post: any }) {
     const [likes, setLikes] = useState<number>(initialPost.likesCount ?? 0);
@@ -29,8 +30,18 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
     const [commentCount, setCommentCount] = useState<number>(initialPost.commentsCount ?? 0);
     const [commentDialogOpen, setCommentDialogOpen] = useState(false);
     const { user } = useAuthStore();
+    const router = useRouter();
     const images: string[] = initialPost.imageUrls ?? [];
     const { openAt, lightboxProps } = useLightbox(images);
+
+    const navigateToDetails = (e: React.MouseEvent) => {
+        // Prevent navigation if clicking interactive elements
+        const target = e.target as HTMLElement;
+        if (target.closest('button') || target.closest('a') || target.closest('.no-click')) {
+            return;
+        }
+        router.push(`/feed/${initialPost.id}`);
+    };
 
     const authorName =
         initialPost.author.userProfile?.name ||
@@ -75,7 +86,8 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="bg-card border border-border/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
+                onClick={navigateToDetails}
+                className="bg-card border border-border/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer group/card"
             >
                 {/* ── Header ─────────────────────────────────────── */}
                 <div className="flex items-start justify-between px-4 pt-4 pb-3">
@@ -116,11 +128,9 @@ export function FeedPostCard({ post: initialPost }: { post: any }) {
                 {/* ── Content ────────────────────────────────────── */}
                 <div className="px-4 pb-2 space-y-1.5">
                     {initialPost.title && (
-                        <Link href={`/feed/${initialPost.id}`}>
-                            <h2 className="font-bold text-sm leading-snug hover:text-primary transition-colors line-clamp-2">
-                                {initialPost.title}
-                            </h2>
-                        </Link>
+                        <h2 className="font-bold text-sm leading-snug hover:text-primary transition-colors line-clamp-2">
+                            {initialPost.title}
+                        </h2>
                     )}
                     {initialPost.description && (
                         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">

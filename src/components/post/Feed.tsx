@@ -7,7 +7,22 @@ import { postService } from "@/services/postService";
 import { FeedPostCard } from "./FeedPostCard";
 import { FeedHeader } from "./FeedHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, SearchX, Search, SlidersHorizontal, Sparkles, TrendingUp, Users, Gift, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+    Loader2, 
+    SearchX, 
+    Search, 
+    SlidersHorizontal, 
+    Sparkles, 
+    TrendingUp, 
+    Users, 
+    Gift, 
+    ShieldCheck, 
+    ShoppingBag,
+    User,
+    ArrowRight
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -157,8 +172,44 @@ function LeftSidebar({ filters, onFilterChange }: { filters: FilterState; onFilt
         onFilterChange({ ...filters, [key]: value === "ALL" ? undefined : value });
     };
 
+    const { user } = useAuth();
+
     return (
-        <>
+        <div className="space-y-4">
+            {/* User Info Card */}
+            <div className="bg-card border border-border/60 rounded-2xl p-5 space-y-4 shadow-sm">
+                <Link href="/profile" className="flex items-center gap-4 group">
+                    <Avatar className="h-12 w-12 border-2 border-primary/20 group-hover:border-primary/40 transition-colors">
+                        <AvatarImage src={user?.profilePictureUrl || ""} alt={user?.name || "User"} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-black text-lg">
+                            {user?.name?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                        <p className="font-black text-foreground group-hover:text-primary transition-colors truncate">{user?.name || "Member"}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">View Profile</p>
+                    </div>
+                </Link>
+
+                {(user?.role === 'USER' || user?.role === 'ORGANIZATION') && (
+                    <>
+                        <div className="h-px bg-border/50" />
+                        <Link 
+                            href="/profile/requests" 
+                            className="flex items-center justify-between p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group border border-primary/10"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                    <ShoppingBag className="w-4 h-4 text-primary" />
+                                </div>
+                                <span className="text-sm font-black text-foreground">Requests</span>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+                        </Link>
+                    </>
+                )}
+            </div>
+
             {/* Search */}
             <div className="bg-card border border-border/60 rounded-2xl p-4 space-y-3">
                 <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
@@ -237,7 +288,7 @@ function LeftSidebar({ filters, onFilterChange }: { filters: FilterState; onFilt
                     Clear All Filters
                 </Button>
             )}
-        </>
+        </div>
     );
 }
 
@@ -306,6 +357,12 @@ function RightSidebar() {
                         <Users className="w-3.5 h-3.5 text-amber-500" />
                     </div>
                     <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">Post a Request</span>
+                </Link>
+                <Link href="/profile/requests" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/60 transition-colors group">
+                    <div className="p-1.5 bg-primary/10 rounded-lg">
+                        <ShoppingBag className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">View My Requests</span>
                 </Link>
             </div>
 

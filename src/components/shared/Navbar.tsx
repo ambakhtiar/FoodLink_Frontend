@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, LayoutDashboard, Settings, LogOut, Sun, Moon } from "lucide-react";
+import { Menu, X, User, LayoutDashboard, Settings, LogOut, Sun, Moon, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { APP_NAME_FF, APP_NAME_SS, FULL_APP_NAME } from "@/lib/constants";
 
 function ThemeToggle() {
@@ -52,18 +53,24 @@ function ThemeToggle() {
     );
 }
 
-const publicRoutes = [
+interface Route {
+    href: string;
+    label: string;
+    roles?: string[];
+}
+
+const publicRoutes: Route[] = [
     { href: "/", label: "Home" },
     { href: "/feed", label: "Feed" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
 ];
 
-const authenticatedRoutes = [
+const authenticatedRoutes: Route[] = [
     { href: "/", label: "Home" },
     { href: "/feed", label: "Feed" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/my-requests", label: "My Requests" },
+    { href: "/profile/requests", label: "Requests", roles: ["USER", "ORGANIZATION"] },
+    { href: "/dashboard", label: "Dashboard", roles: ["ADMIN"] },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
 ];
@@ -74,6 +81,7 @@ export function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const { isAuthenticated, isHydrated, user, logout } = useAuth();
+    const { scrollDirection, isAtTop } = useScrollDirection();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -85,7 +93,8 @@ export function Navbar() {
 
     // Prevent hydration mismatch
     const showAuthenticatedUI = isHydrated && isAuthenticated;
-    const routes = showAuthenticatedUI ? authenticatedRoutes : publicRoutes;
+    const routes = (showAuthenticatedUI ? authenticatedRoutes : publicRoutes)
+        .filter(route => !route.roles || (user?.role && route.roles.includes(user.role)));
 
     const handleLogout = () => {
         logout();
@@ -94,7 +103,11 @@ export function Navbar() {
     };
 
     return (
-        <header className="sticky top-0 z-50 w-full pt-2 px-4 sm:px-6 lg:px-8 transition-all duration-300">
+        <header 
+            className={`sticky top-0 z-50 w-full pt-2 px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+                scrollDirection === "down" && !isAtTop ? "-translate-y-full" : "translate-y-0"
+            }`}
+        >
             {/* Pill Container */}
             <div className={`mx-auto max-w-7xl rounded-[2rem] border border-white/10 dark:border-white/5 shadow-sm backdrop-blur-xl transition-all duration-300 relative ${scrolled
                 ? "bg-background/95 h-14 shadow-primary/5"
@@ -177,12 +190,22 @@ export function Navbar() {
                                             <span>My Profile</span>
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem asChild className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
-                                        <Link href="/dashboard">
-                                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                                            <span>Control Center</span>
-                                        </Link>
-                                    </DropdownMenuItem>
+                                    {(user?.role === 'USER' || user?.role === 'ORGANIZATION') && (
+                                        <DropdownMenuItem asChild className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
+                                            <Link href="/profile/requests">
+                                                <ShoppingBag className="mr-2 h-4 w-4" />
+                                                <span>Requests</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    {user?.role === 'ADMIN' && (
+                                        <DropdownMenuItem asChild className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
+                                            <Link href="/dashboard">
+                                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                <span>Control Center</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem asChild className="rounded-lg focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
                                         <Link href="/settings">
                                             <Settings className="mr-2 h-4 w-4" />
@@ -261,19 +284,24 @@ export function Navbar() {
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-6 space-y-2">
-                                    {routes.map((route) => (
-                                        <Link
-                                            key={route.href}
-                                            href={route.href}
-                                            onClick={() => setMobileMenuOpen(false)}
-                                            className={`flex items-center rounded-2xl px-5 py-4 text-xl font-bold transition-all ${pathname === route.href
-                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                                : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                                    {/* Mobile Routes */}
+                                    <div className="flex flex-col gap-1 mb-6">
+                                        {routes.map((route) => (
+                                            <Link
+                                                key={route.href}
+                                                href={route.href}
+                                                onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex items-center justify-between px-6 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${
+                                                    pathname === route.href
+                                                        ? "bg-primary/10 text-primary"
+                                                        : "text-foreground/70 hover:bg-foreground/5"
                                                 }`}
-                                        >
-                                            {route.label}
-                                        </Link>
-                                    ))}
+                                            >
+                                                {route.label}
+                                                {pathname === route.href && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                            </Link>
+                                        ))}
+                                    </div>
                                     
                                     <div className="mt-8 pt-8 border-t border-white/5">
                                         {!isHydrated ? (
@@ -295,7 +323,7 @@ export function Navbar() {
                                                         <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4">
+                                                 <div className={`grid ${user?.role === 'ADMIN' ? 'grid-cols-2' : 'grid-cols-2'} gap-4`}>
                                                     <Link
                                                         href="/profile"
                                                         onClick={() => setMobileMenuOpen(false)}
@@ -304,14 +332,25 @@ export function Navbar() {
                                                         <User className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
                                                         <span className="text-[10px] font-black uppercase tracking-widest">Profile</span>
                                                     </Link>
-                                                    <Link
-                                                        href="/dashboard"
-                                                        onClick={() => setMobileMenuOpen(false)}
-                                                        className="flex flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-foreground/5 p-6 hover:bg-foreground/10 transition-colors group"
-                                                    >
-                                                        <LayoutDashboard className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest">Dash</span>
-                                                    </Link>
+                                                    {(user?.role === 'USER' || user?.role === 'ORGANIZATION') ? (
+                                                        <Link
+                                                            href="/profile/requests"
+                                                            onClick={() => setMobileMenuOpen(false)}
+                                                            className="flex flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-foreground/5 p-6 hover:bg-foreground/10 transition-colors group"
+                                                        >
+                                                            <ShoppingBag className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest">Requests</span>
+                                                        </Link>
+                                                    ) : (
+                                                        <Link
+                                                            href="/dashboard"
+                                                            onClick={() => setMobileMenuOpen(false)}
+                                                            className="flex flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-foreground/5 p-6 hover:bg-foreground/10 transition-colors group"
+                                                        >
+                                                            <LayoutDashboard className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest">Dash</span>
+                                                        </Link>
+                                                    )}
                                                 </div>
                                                 <Button
                                                     onClick={handleLogout}

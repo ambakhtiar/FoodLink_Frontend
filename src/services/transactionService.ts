@@ -43,8 +43,17 @@ const completeTransaction = async (transactionId: string): Promise<{ data: Trans
     return response.data;
 };
 
+const getMyRequests = async (params: {
+    page?: number;
+    limit?: number;
+}): Promise<{ success: boolean; data: (TransactionResponse & { post: any })[]; meta: any }> => {
+    const response = await apiClient.get('/transaction/my-requests', { params });
+    return response.data;
+};
+
 export const transactionService = {
     requestItem,
     respondToRequest,
     completeTransaction,
+    getMyRequests,
 };

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { Lightbox, useLightbox } from "@/components/ui/Lightbox";
 import { transactionService } from "@/services/transactionService";
 import { ReviewDialog } from "@/components/post/ReviewDialog";
+import { PostDetailsSkeleton } from "@/components/post/PostDetailsSkeleton";
 import {
     Dialog,
     DialogContent,
@@ -54,13 +55,24 @@ export default function PostDetailsClient() {
 
     // Fetch post
     useEffect(() => {
+        if (!id) return;
+        
+        setIsLoading(true);
         postService.getPostById(id)
             .then((r) => {
-                setPost(r.data);
-                setLikes(r.data.likesCount ?? 0);
-                setIsLiked(r.data.isLikedByMe ?? false);
+                if (r.data) {
+                    setPost(r.data);
+                    setLikes(r.data.likesCount ?? 0);
+                    setIsLiked(r.data.isLikedByMe ?? false);
+                } else {
+                    setPost(null);
+                }
             })
-            .catch(() => toast.error("Failed to load post"))
+            .catch((err) => {
+                console.error("Error loading post:", err);
+                toast.error("Failed to load post details");
+                setPost(null);
+            })
             .finally(() => setIsLoading(false));
     }, [id]);
 
@@ -201,11 +213,7 @@ export default function PostDetailsClient() {
     const { openAt, lightboxProps } = useLightbox(imageUrls);
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            </div>
-        );
+        return <PostDetailsSkeleton />;
     }
 
     if (!post) {

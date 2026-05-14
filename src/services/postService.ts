@@ -63,10 +63,19 @@ const deleteComment = async (commentId: string) => {
     return response.data;
 };
 
+const getMyPosts = async (params: {
+    page?: number;
+    limit?: number;
+}): Promise<{ success: boolean; data: IPost[]; meta: any }> => {
+    const response = await axiosInstance.get("/post/my-posts", { params });
+    return response.data;
+};
+
 export const postService = {
     createPost,
     getPostById,
     getAllPosts,
+    getMyPosts,
     toggleLike,
     addComment,
     getComments,
