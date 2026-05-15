@@ -7,7 +7,7 @@ export interface User {
     id: string;
     email: string;
     name: string;
-    role: "USER" | "ORGANIZATION" | "ADMIN";
+    role: "USER" | "ORGANIZATION" | "ADMIN" | "SUPER_ADMIN";
     status?: AccountStatus;
     profilePictureUrl?: string;
     phone?: string;
@@ -47,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
                 // Write a lightweight cookie so the server-side proxy can detect auth
                 if (typeof document !== "undefined") {
                     document.cookie = `fl_auth=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                    document.cookie = `fl_role=${user.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
                 }
                 set({
                     user,
@@ -64,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
                 // Clear the auth cookie
                 if (typeof document !== "undefined") {
                     document.cookie = "fl_auth=; path=/; max-age=0; SameSite=Lax";
+                    document.cookie = "fl_role=; path=/; max-age=0; SameSite=Lax";
                 }
                 set({
                     user: null,
